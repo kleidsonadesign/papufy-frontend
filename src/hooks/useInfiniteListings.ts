@@ -15,7 +15,11 @@ export interface ListingsQuery {
   maxPrice?: number;
 }
 
-export function useInfiniteListings(query: ListingsQuery) {
+export function useInfiniteListings(
+  query: ListingsQuery,
+  options?: { enabled?: boolean }
+) {
+  const enabled = options?.enabled !== false;
   const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -64,9 +68,13 @@ export function useInfiniteListings(query: ListingsQuery) {
   );
 
   useEffect(() => {
+    if (!enabled) {
+      setLoading(true);
+      return;
+    }
     offsetRef.current = 0;
     void fetchPage(true);
-  }, [queryKey, fetchPage]);
+  }, [queryKey, fetchPage, enabled]);
 
   const loadMore = useCallback(() => {
     if (!hasMore || loadingMore || loading) return;

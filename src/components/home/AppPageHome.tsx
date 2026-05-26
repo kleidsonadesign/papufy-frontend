@@ -9,8 +9,10 @@ import { FeaturedProfessionalsScroll } from "./FeaturedProfessionalsScroll";
 import { HomeHeroCarousel } from "./HomeHeroCarousel";
 import { RecentJobsGrid } from "./RecentJobsGrid";
 
+const FEATURED_COUNT = 6;
+
 export function AppPageHome() {
-  const { filters, locationLabel } = useFilters();
+  const { filters, locationLabel, locationDetecting } = useFilters();
   const debouncedSearch = useDebounce(filters.search, 400);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -46,7 +48,7 @@ export function AppPageHome() {
     hasMore,
     loadMore,
     refresh,
-  } = useInfiniteListings(query);
+  } = useInfiniteListings(query, { enabled: !locationDetecting });
 
   useEffect(() => {
     const el = sentinelRef.current;
@@ -67,6 +69,14 @@ export function AppPageHome() {
     refresh();
   }, [refresh]);
 
+  const featuredListings = listings.slice(0, FEATURED_COUNT);
+  const moreListings = listings.slice(FEATURED_COUNT);
+  const regionSubtitle = locationDetecting
+    ? "Detectando sua localização..."
+    : `Em ${locationLabel}`;
+  const showMoreSection =
+    Boolean(error) || loading || moreListings.length > 0 || hasMore;
+
   return (
     <div className="flex flex-col space-y-6 pb-4">
       <div className="mobile-gutter pt-2">
@@ -85,27 +95,30 @@ export function AppPageHome() {
           </button>
         </div>
 
-        <RecentJobsGrid subtitle={`Perto de ${locationLabel}`} />
+        <RecentJobsGrid
+          listings={featuredListings}
+          loading={loading}
+          locationLabel={locationLabel}
+          locationDetecting={locationDetecting}
+        />
 
         <FeaturedProfessionalsScroll />
 
-        {(loading || listings.length > 0 || error) && (
+        {showMoreSection && (
           <section>
             <header className="mb-3">
               <h2 className="text-base font-extrabold text-slate-900">
                 Mais anúncios na região
               </h2>
-              <p className="text-xs text-slate-500">
-                Bicos e produtos do marketplace Papufy
-              </p>
+              <p className="text-xs text-slate-500">{regionSubtitle}</p>
             </header>
 
-            {loading && listings.length === 0 && (
-              <div className="grid grid-cols-2 gap-3">
+            {loading && moreListings.length === 0 && featuredListings.length === 0 && (
+              <div className="grid grid-cols-2 gap-2">
                 {Array.from({ length: 4 }).map((_, i) => (
                   <div
                     key={i}
-                    className="aspect-[4/5] animate-pulse rounded-xl bg-slate-200"
+                    className="aspect-square animate-pulse rounded-lg bg-slate-200"
                   />
                 ))}
               </div>
@@ -128,25 +141,28 @@ export function AppPageHome() {
               </div>
             )}
 
-            {listings.length > 0 && (
-              <>
-                <div className="grid grid-cols-2 gap-3">
-                  {listings.map((listing) => (
-                    <ListingCardMobile key={listing.id} listing={listing} />
-                  ))}
-                </div>
-                <div ref={sentinelRef} className="h-4" aria-hidden />
-                {loadingMore && (
-                  <p className="py-4 text-center text-xs text-slate-500">
-                    Carregando mais...
-                  </p>
-                )}
-                {!hasMore && (
-                  <p className="py-4 text-center text-xs text-slate-500">
-                    Você viu todos os anúncios
-                  </p>
-                )}
-              </>
+            {moreListings.length > 0 && (
+              <div className="grid grid-cols-2 gap-2">
+                {moreListings.map((listing) => (
+                  <ListingCardMobile
+                    key={listing.id}
+                    listing={listing}
+                    compact
+                  />
+                ))}
+              </div>
+            )}
+
+            {hasMore && <div ref={sentinelRef} className="h-4" aria-hidden />}
+            {loadingMore && (
+              <p className="py-4 text-center text-xs text-slate-500">
+                Carregando mais...
+              </p>
+            )}
+            {!hasMore && moreListings.length > 0 && (
+              <p className="py-4 text-center text-xs text-slate-500">
+                Você viu todos os anúncios
+              </p>
             )}
           </section>
         )}

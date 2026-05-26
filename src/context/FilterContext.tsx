@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import type { ListingTypeFilter } from "../constants/categories";
+import { detectUserCity, isLocationManual, markLocationManual } from "../lib/geolocation";
 
 export interface JobFilters {
   search: string;
@@ -22,6 +23,8 @@ export interface JobFilters {
 interface FilterContextValue {
   filters: JobFilters;
   locationLabel: string;
+  /** true enquanto tenta GPS (só na 1ª carga, se o usuário não escolheu cidade manualmente). */
+  locationDetecting: boolean;
   setSearch: (search: string) => void;
   setCategory: (category: string | null) => void;
   setTipo: (tipo: ListingTypeFilter) => void;
@@ -58,6 +61,34 @@ const FilterContext = createContext<FilterContextValue | null>(null);
 
 export function FilterProvider({ children }: { children: ReactNode }) {
   const [filters, setFilters] = useState<JobFilters>(loadFilters);
+  const [locationDetecting, setLocationDetecting] = useState(
+    () => !isLocationManual()
+  );
+
+  useEffect(() => {
+    if (isLocationManual()) {
+      setLocationDetecting(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    void detectUserCity().then((loc) => {
+      if (cancelled) return;
+      if (loc) {
+        setFilters((prev) => ({
+          ...prev,
+          cidade: loc.cidade,
+          uf: loc.uf,
+        }));
+      }
+      setLocationDetecting(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem(
@@ -118,6 +149,8 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setLocation = useCallback((cidade: string, uf: string) => {
+    markLocationManual();
+    setLocationDetecting(false);
     setFilters((prev) => ({ ...prev, cidade, uf }));
   }, []);
 
@@ -125,6 +158,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
     () => ({
       filters,
       locationLabel,
+      locationDetecting,
       setSearch,
       setCategory,
       setTipo,
@@ -137,6 +171,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
     [
       filters,
       locationLabel,
+      locationDetecting,
       setSearch,
       setCategory,
       setTipo,
