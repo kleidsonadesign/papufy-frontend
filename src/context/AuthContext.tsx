@@ -20,6 +20,7 @@ interface AuthContextValue {
     nome: string;
     email: string;
     senha: string;
+    cpfCnpj: string;
     telefone?: string;
     cidade?: string;
     uf?: string;
@@ -114,6 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       nome: string;
       email: string;
       senha: string;
+      cpfCnpj: string;
       telefone?: string;
       cidade?: string;
       uf?: string;

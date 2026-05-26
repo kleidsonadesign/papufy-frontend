@@ -126,6 +126,7 @@ export const api = {
       nome: string;
       email: string;
       senha: string;
+      cpfCnpj: string;
       telefone?: string;
       cidade?: string;
       uf?: string;
