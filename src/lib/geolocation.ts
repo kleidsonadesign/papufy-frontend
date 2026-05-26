@@ -1,27 +1,25 @@
+/** Só na sessão atual — nova aba/sessão volta a detectar GPS automaticamente. */
 const LOCATION_MANUAL_KEY = "papufy_location_manual";
 
-export function isLocationManual(): boolean {
+function sessionStore(): Storage | null {
   try {
-    return localStorage.getItem(LOCATION_MANUAL_KEY) === "1";
+    return sessionStorage;
   } catch {
-    return false;
+    return null;
   }
+}
+
+export function isLocationManual(): boolean {
+  const store = sessionStore();
+  return store?.getItem(LOCATION_MANUAL_KEY) === "1";
 }
 
 export function markLocationManual(): void {
-  try {
-    localStorage.setItem(LOCATION_MANUAL_KEY, "1");
-  } catch {
-    /* ignore */
-  }
+  sessionStore()?.setItem(LOCATION_MANUAL_KEY, "1");
 }
 
 export function clearLocationManual(): void {
-  try {
-    localStorage.removeItem(LOCATION_MANUAL_KEY);
-  } catch {
-    /* ignore */
-  }
+  sessionStore()?.removeItem(LOCATION_MANUAL_KEY);
 }
 
 function ufFromNominatimAddress(
@@ -99,9 +97,9 @@ export function detectUserCity(): Promise<{ cidade: string; uf: string } | null>
       },
       () => resolve(null),
       {
-        enableHighAccuracy: false,
-        timeout: 12_000,
-        maximumAge: 5 * 60 * 1000,
+        enableHighAccuracy: true,
+        timeout: 15_000,
+        maximumAge: 60_000,
       }
     );
   });

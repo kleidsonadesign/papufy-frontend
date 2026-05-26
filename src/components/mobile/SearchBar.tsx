@@ -39,7 +39,6 @@ export function SearchBar({
     filters,
     locationLabel,
     locationDetecting,
-    detectLocation,
     setSearch,
     applySearch,
     setLocation,
@@ -49,7 +48,6 @@ export function SearchBar({
   const [cidade, setCidade] = useState(filters.cidade);
   const [uf, setUf] = useState(filters.uf);
   const [recent, setRecent] = useState<string[]>(loadRecent);
-  const [gpsLoading, setGpsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -104,17 +102,8 @@ export function SearchBar({
     commitSearch(term);
   };
 
-  const handleUseGps = async () => {
-    setGpsLoading(true);
-    try {
-      await detectLocation();
-    } finally {
-      setGpsLoading(false);
-    }
-  };
-
   const locationHint = locationDetecting
-    ? "Detectando localização..."
+    ? "Detectando sua localização..."
     : `Buscando em ${locationLabel}`;
 
   return (
@@ -161,7 +150,11 @@ export function SearchBar({
                     setLocalSearch(e.target.value);
                     setSearch(e.target.value);
                   }}
-                  placeholder={`Buscar em ${filters.cidade}...`}
+                  placeholder={
+                    locationDetecting
+                      ? "Detectando localização..."
+                      : `Buscar em ${filters.cidade}...`
+                  }
                   className="w-full rounded-full border border-papufy-border py-3 pl-4 pr-11 text-base outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-400/25"
                 />
                 <button
@@ -175,8 +168,8 @@ export function SearchBar({
             </div>
 
             <p className="mt-2 text-center text-[11px] font-medium text-papufy-muted">
-              {locationDetecting || gpsLoading
-                ? "Detectando sua localização..."
+              {locationDetecting
+                ? "Usando GPS automaticamente..."
                 : `Resultados em ${locationLabel}`}
             </p>
 
@@ -201,15 +194,11 @@ export function SearchBar({
                 className="input-field h-11 min-w-0 flex-1 rounded-xl"
                 aria-label="Cidade"
               />
-              <button
-                type="button"
-                onClick={() => void handleUseGps()}
-                disabled={gpsLoading || locationDetecting}
-                className="h-11 shrink-0 rounded-xl border border-sky-200 bg-sky-50 px-3 text-xs font-bold text-sky-700 active:scale-95 disabled:opacity-50"
-              >
-                GPS
-              </button>
             </div>
+            <p className="mt-2 text-center text-[10px] text-slate-400">
+              A localização é detectada automaticamente. Altere cidade/UF só se
+              quiser buscar em outro lugar.
+            </p>
           </form>
 
           <div className="flex-1 overflow-y-auto overscroll-contain px-4 py-4">

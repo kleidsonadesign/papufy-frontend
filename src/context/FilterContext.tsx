@@ -9,7 +9,6 @@ import {
 } from "react";
 import type { ListingTypeFilter } from "../constants/categories";
 import {
-  clearLocationManual,
   detectUserCity,
   isLocationManual,
   markLocationManual,
@@ -30,8 +29,6 @@ interface FilterContextValue {
   locationLabel: string;
   /** true enquanto tenta GPS (só na 1ª carga, se o usuário não escolheu cidade manualmente). */
   locationDetecting: boolean;
-  /** Atualiza cidade/UF pelo GPS (ex.: botão na busca). */
-  detectLocation: () => Promise<void>;
   setSearch: (search: string) => void;
   setCategory: (category: string | null) => void;
   setTipo: (tipo: ListingTypeFilter) => void;
@@ -72,16 +69,15 @@ export function FilterProvider({ children }: { children: ReactNode }) {
     () => !isLocationManual()
   );
 
-  useEffect(() => {
+  const runAutoLocation = useCallback(async () => {
     if (isLocationManual()) {
       setLocationDetecting(false);
       return;
     }
 
-    let cancelled = false;
-
-    void detectUserCity().then((loc) => {
-      if (cancelled) return;
+    setLocationDetecting(true);
+    try {
+      const loc = await detectUserCity();
       if (loc) {
         setFilters((prev) => ({
           ...prev,
@@ -89,13 +85,24 @@ export function FilterProvider({ children }: { children: ReactNode }) {
           uf: loc.uf,
         }));
       }
+    } finally {
       setLocationDetecting(false);
-    });
-
-    return () => {
-      cancelled = true;
-    };
+    }
   }, []);
+
+  useEffect(() => {
+    void runAutoLocation();
+  }, [runAutoLocation]);
+
+  useEffect(() => {
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        void runAutoLocation();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [runAutoLocation]);
 
   useEffect(() => {
     localStorage.setItem(
@@ -156,26 +163,15 @@ export function FilterProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setLocation = useCallback((cidade: string, uf: string) => {
-    markLocationManual();
+    const nextCidade = cidade.trim();
+    const nextUf = uf.trim().toUpperCase();
+    setFilters((prev) => {
+      const changed =
+        prev.cidade !== nextCidade || prev.uf.toUpperCase() !== nextUf;
+      if (changed) markLocationManual();
+      return { ...prev, cidade: nextCidade, uf: nextUf };
+    });
     setLocationDetecting(false);
-    setFilters((prev) => ({ ...prev, cidade, uf }));
-  }, []);
-
-  const detectLocation = useCallback(async () => {
-    setLocationDetecting(true);
-    try {
-      const loc = await detectUserCity();
-      if (loc) {
-        clearLocationManual();
-        setFilters((prev) => ({
-          ...prev,
-          cidade: loc.cidade,
-          uf: loc.uf,
-        }));
-      }
-    } finally {
-      setLocationDetecting(false);
-    }
   }, []);
 
   const value = useMemo(
@@ -183,7 +179,6 @@ export function FilterProvider({ children }: { children: ReactNode }) {
       filters,
       locationLabel,
       locationDetecting,
-      detectLocation,
       setSearch,
       setCategory,
       setTipo,
@@ -197,7 +192,6 @@ export function FilterProvider({ children }: { children: ReactNode }) {
       filters,
       locationLabel,
       locationDetecting,
-      detectLocation,
       setSearch,
       setCategory,
       setTipo,
