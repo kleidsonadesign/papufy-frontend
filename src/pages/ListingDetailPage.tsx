@@ -153,7 +153,7 @@ export function ListingDetailPage() {
         </p>
       </article>
 
-      <div className="fixed bottom-[calc(11.5rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-md">
+      <div className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-md">
         <button
           type="button"
           onClick={handleContact}
