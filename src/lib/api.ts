@@ -120,6 +120,13 @@ async function uploadRequest<T>(
   return data as T;
 }
 
+function normalizeListing(listing: Listing): Listing {
+  const listingType =
+    listing.listingType ??
+    (listing.tipo === "BICO" ? "JOB_VACANCY" : "PROFESSIONAL_PROFILE");
+  return { ...listing, listingType };
+}
+
 export const api = {
   auth: {
     register: (body: {
@@ -194,13 +201,46 @@ export const api = {
       if (params?.limit != null) query.set("limit", String(params.limit));
       if (params?.offset != null) query.set("offset", String(params.offset));
       const qs = query.toString();
-      return request<ListingsPage>(`/listings${qs ? `?${qs}` : ""}`);
+      return request<ListingsPage>(`/listings${qs ? `?${qs}` : ""}`).then(
+        (page) => ({
+          ...page,
+          listings: page.listings.map(normalizeListing),
+        })
+      );
     },
 
-    getById: (id: string) => request<{ listing: Listing }>(`/listings/${id}`),
+    getById: (id: string) =>
+      request<{ listing: Listing }>(`/listings/${id}`).then((data) => ({
+        listing: normalizeListing(data.listing),
+      })),
 
     create: (formData: FormData) =>
-      uploadRequest<{ listing: Listing }>("/listings", formData),
+      uploadRequest<{ listing: Listing }>("/listings", formData).then(
+        (data) => ({
+          listing: normalizeListing(data.listing),
+        })
+      ),
+
+    listMine: () =>
+      request<{ listings: Listing[]; total: number }>("/listings/mine").then(
+        (data) => ({
+          ...data,
+          listings: data.listings.map(normalizeListing),
+        })
+      ),
+
+    close: (id: string) =>
+      request<{ listing: Listing }>(`/listings/${id}/close`, {
+        method: "PATCH",
+      }).then((data) => ({ listing: normalizeListing(data.listing) })),
+
+    reopen: (id: string) =>
+      request<{ listing: Listing }>(`/listings/${id}/reopen`, {
+        method: "PATCH",
+      }).then((data) => ({ listing: normalizeListing(data.listing) })),
+
+    remove: (id: string) =>
+      request<void>(`/listings/${id}`, { method: "DELETE" }),
   },
 
   user: {
@@ -324,6 +364,11 @@ export const api = {
       ),
 
     unread: () => request<{ count: number }>("/chat/unread"),
+
+    startListing: (listingId: string) =>
+      request<{ conversationId: string }>(`/chat/listings/${listingId}/start`, {
+        method: "POST",
+      }),
   },
 };
 

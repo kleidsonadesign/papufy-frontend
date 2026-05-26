@@ -1,8 +1,12 @@
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useChat } from "../../context/ChatContext";
 import { PapufyLogo } from "../PapufyLogo";
-import { IconChat, IconSearch } from "../icons/NavIcons";
+import { IconChat } from "../icons/NavIcons";
+
+const GUEST_CTA_LABELS = ["Anunciar grátis", "Encontrar Serviço"] as const;
+const CTA_ROTATE_MS = 4000;
 
 function IconChevronDown({ className = "h-4 w-4" }: { className?: string }) {
   return (
@@ -29,9 +33,28 @@ export function HeaderMobile() {
   const { isAuthenticated, user } = useAuth();
   const { unreadCount } = useChat();
   const navigate = useNavigate();
+  const [ctaIndex, setCtaIndex] = useState(0);
 
   const firstName = displayFirstName(user?.nome);
   const initial = user?.nome?.charAt(0).toUpperCase() ?? "?";
+
+  useEffect(() => {
+    if (isAuthenticated) return;
+    const id = window.setInterval(() => {
+      setCtaIndex((i) => (i + 1) % GUEST_CTA_LABELS.length);
+    }, CTA_ROTATE_MS);
+    return () => window.clearInterval(id);
+  }, [isAuthenticated]);
+
+  const guestCtaLabel = GUEST_CTA_LABELS[ctaIndex];
+
+  const handleGuestCta = () => {
+    if (guestCtaLabel === "Anunciar grátis") {
+      navigate("/entrar", { state: { redirect: "/anunciar/tipo" } });
+      return;
+    }
+    navigate("/");
+  };
 
   const openChat = () => {
     if (isAuthenticated) {
@@ -53,14 +76,6 @@ export function HeaderMobile() {
         </Link>
 
         <div className="flex items-center gap-3 sm:gap-4">
-          <Link
-            to="/buscar"
-            className="flex h-10 w-10 items-center justify-center rounded-full text-slate-600 transition active:scale-95 active:bg-slate-50"
-            aria-label="Buscar"
-          >
-            <IconSearch className="h-6 w-6 text-sky-600" />
-          </Link>
-
           <button
             type="button"
             onClick={openChat}
@@ -94,12 +109,27 @@ export function HeaderMobile() {
               <IconChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
             </Link>
           ) : (
-            <Link
-              to="/entrar"
-              className="rounded-full border border-sky-200 bg-sky-50 px-4 py-2 text-sm font-bold text-sky-600 transition active:scale-95"
-            >
-              Entrar
-            </Link>
+            <div className="flex shrink-0 items-center gap-2">
+              <Link
+                to="/entrar"
+                className="rounded-full border border-sky-500 bg-white px-3 py-2 text-xs font-bold text-sky-600 transition active:scale-95 sm:px-4 sm:text-sm"
+              >
+                Entrar
+              </Link>
+              <button
+                type="button"
+                onClick={handleGuestCta}
+                className="relative min-w-[7.75rem] overflow-hidden rounded-full bg-gradient-to-r from-sky-500 to-blue-500 px-3 py-2 text-xs font-bold text-white shadow-md shadow-sky-200/60 transition active:scale-95 sm:min-w-[8.5rem] sm:px-4 sm:text-sm"
+                aria-label={guestCtaLabel}
+              >
+                <span
+                  key={guestCtaLabel}
+                  className="header-cta-fade block truncate text-center"
+                >
+                  {guestCtaLabel}
+                </span>
+              </button>
+            </div>
           )}
         </div>
       </div>

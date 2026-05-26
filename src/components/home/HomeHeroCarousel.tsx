@@ -5,9 +5,10 @@ import {
   useState,
   type TouchEvent,
 } from "react";
-import { PapufyLogo } from "../PapufyLogo";
+import { Link } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { useFilters } from "../../context/FilterContext";
 import { HERO_SLIDES, type HeroSlide } from "../../data/homeMocks";
-import { QrCodePlaceholder } from "./QrCodePlaceholder";
 
 const AUTO_MS = 5500;
 const SWIPE_THRESHOLD = 48;
@@ -30,135 +31,103 @@ function IconChevron({ direction }: { direction: "left" | "right" }) {
   );
 }
 
-/** Slide 1 — gradiente azul claro vibrante (identidade Papufy) */
-function SkyPromoSlide() {
+function FindServiceSlide() {
+  const { setCategory, setTipo } = useFilters();
+
+  const openReformas = () => {
+    setTipo(null);
+    setCategory("Reformas e Reparos");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
-    <div className="relative flex h-full min-h-[200px] flex-col overflow-hidden rounded-2xl bg-gradient-to-r from-sky-400 to-blue-500 px-3 pb-10 pt-3 shadow-lg shadow-sky-200/50 sm:min-h-[220px] sm:px-4">
-      <p className="text-center text-sm font-extrabold leading-tight text-white sm:text-base">
-        Sua grana extra rápida.
-      </p>
-
-      <div className="relative mt-2 flex flex-1 items-stretch gap-1 sm:mt-3">
-        <div className="flex w-[28%] shrink-0 flex-col justify-between py-1">
-          <div className="w-fit rounded-lg bg-white/95 px-2 py-1 shadow-sm">
-            <PapufyLogo className="h-6 w-auto max-w-full sm:h-7" />
-          </div>
-          <p className="text-[9px] font-bold uppercase text-sky-100 sm:text-[10px]">
-            Sua marca
-          </p>
-        </div>
-
-        <div className="flex min-w-0 flex-1 items-center justify-center gap-1 sm:gap-1.5">
-          <div className="flex max-w-[32%] flex-1 flex-col rounded-xl bg-white px-2 py-2 shadow-md sm:px-2.5 sm:py-2.5">
-            <p className="text-[8px] font-bold uppercase text-sky-600 sm:text-[9px]">
-              Crie 3 anúncios
-            </p>
-            <p className="mt-1 text-[10px] font-extrabold leading-tight text-slate-800 sm:text-xs">
-              Faça 1 bico hoje.
-            </p>
-          </div>
-
-          <div className="flex shrink-0 flex-col items-center justify-center text-white">
-            <span className="text-xl font-black sm:text-2xl">→</span>
-          </div>
-
-          <div className="flex max-w-[32%] flex-1 flex-col rounded-xl bg-white px-2 py-2 shadow-md sm:px-2.5 sm:py-2.5">
-            <p className="text-[8px] font-bold uppercase text-sky-600 sm:text-[9px]">
-              Ganhe 3 destaques
-            </p>
-            <p className="mt-1 text-[10px] font-extrabold leading-tight text-slate-800 sm:text-xs">
-              Receba seu Pix na hora.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex w-[26%] shrink-0 flex-col items-center justify-between py-0.5">
-          <div className="relative text-center">
-            <span className="text-2xl sm:text-3xl" aria-hidden>
-              🪙
-            </span>
-            <p className="mt-0.5 text-[9px] font-bold text-amber-200 sm:text-[10px]">
-              Aproveite!
-            </p>
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="mb-1 w-fit rounded-md bg-white/90 px-1.5 py-0.5">
-              <PapufyLogo className="h-4 w-auto max-w-full" />
-            </div>
-            <QrCodePlaceholder className="scale-90 sm:scale-100" />
-            <p className="mt-1 text-[8px] font-bold uppercase tracking-wide text-white sm:text-[9px]">
-              Baixe o App
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function BlueProSlide() {
-  return (
-    <div className="relative flex h-full min-h-[200px] flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-br from-sky-300 via-sky-400 to-blue-500 px-4 py-5 shadow-lg shadow-sky-200/40 sm:min-h-[220px]">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-wide text-sky-50">
-            Papufy Pro
-          </p>
-          <h3 className="mt-1 text-lg font-extrabold leading-tight text-white sm:text-xl">
-            Torne-se um Profissional Destaque
-          </h3>
-          <p className="mt-2 max-w-[200px] text-xs leading-relaxed text-sky-50/95">
-            Mais visibilidade, mais contatos e avaliações que geram confiança.
-          </p>
-        </div>
-        <div className="flex gap-1 text-2xl sm:text-3xl" aria-hidden>
-          <span>🔨</span>
-          <span>⚡</span>
-          <span>🧰</span>
-        </div>
+    <div className="relative flex h-full min-h-[180px] flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-br from-sky-100 via-sky-200 to-blue-300 px-4 py-5 sm:min-h-[200px]">
+      <div>
+        <p className="text-xs font-bold uppercase tracking-wide text-sky-700">
+          Encontrar serviço
+        </p>
+        <h3 className="mt-1 text-lg font-extrabold leading-tight text-slate-800 sm:text-xl">
+          Profissionais perto de você
+        </h3>
+        <p className="mt-2 text-xs text-slate-600">
+          Busque na barra do menu ou filtre por categoria.
+        </p>
       </div>
       <button
         type="button"
-        className="mt-3 w-fit rounded-full bg-white px-4 py-2 text-xs font-bold text-sky-700 active:scale-95"
+        onClick={openReformas}
+        className="mt-3 w-fit rounded-full bg-white px-4 py-2 text-xs font-bold text-sky-700 shadow-sm active:scale-95"
       >
-        Quero ser destaque
+        Ver reformas na região
       </button>
     </div>
   );
 }
 
-function SkyCategorySlide() {
+function PostServiceSlide() {
+  const { isAuthenticated } = useAuth();
+
   return (
-    <div className="relative flex h-full min-h-[200px] flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-br from-sky-100 via-sky-200 to-blue-300 px-4 py-5 sm:min-h-[220px]">
+    <div className="relative flex h-full min-h-[180px] flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-r from-sky-400 to-blue-500 px-4 py-5 sm:min-h-[200px]">
       <div>
-        <p className="text-xs font-bold uppercase tracking-wide text-sky-700">
-          Categorias mais buscadas
+        <p className="text-xs font-bold uppercase tracking-wide text-sky-50">
+          Anunciar grátis
         </p>
-        <h3 className="mt-1 text-lg font-extrabold leading-tight text-slate-800 sm:text-xl">
-          Reformas perto de você
+        <h3 className="mt-1 text-lg font-extrabold leading-tight text-white sm:text-xl">
+          Precisa de ajuda? Publique um pedido
         </h3>
-        <p className="mt-2 text-xs text-slate-600">
-          Encanadores, pintores e pedreiros disponíveis agora.
+        <p className="mt-2 text-xs leading-relaxed text-sky-50/95">
+          Descreva o serviço e receba contato de profissionais da sua cidade.
         </p>
       </div>
-      <div className="mt-2 flex items-end justify-between gap-2">
-        <div className="flex gap-2 text-3xl sm:text-4xl" aria-hidden>
-          <span>🏠</span>
-          <span>🪣</span>
-          <span>🖌️</span>
-        </div>
-        <span className="rounded-lg bg-white/90 px-2 py-1 text-[10px] font-bold text-sky-700 shadow-sm">
-          Ver reformas
-        </span>
+      <Link
+        to={isAuthenticated ? "/anunciar" : "/entrar"}
+        state={{
+          listingType: "JOB_VACANCY",
+          ...(isAuthenticated ? {} : { redirect: "/anunciar" }),
+        }}
+        className="mt-3 inline-flex w-fit rounded-full bg-white px-4 py-2 text-xs font-bold text-sky-700 shadow-md active:scale-95"
+      >
+        Publicar pedido de serviço
+      </Link>
+    </div>
+  );
+}
+
+function PostProfileSlide() {
+  const { isAuthenticated } = useAuth();
+
+  return (
+    <div className="relative flex h-full min-h-[180px] flex-col justify-between overflow-hidden rounded-2xl bg-gradient-to-br from-sky-300 via-sky-400 to-blue-500 px-4 py-5 sm:min-h-[200px]">
+      <div>
+        <p className="text-xs font-bold uppercase tracking-wide text-sky-50">
+          Trabalhar no Papufy
+        </p>
+        <h3 className="mt-1 text-lg font-extrabold leading-tight text-white sm:text-xl">
+          Anuncie seu perfil profissional
+        </h3>
+        <p className="mt-2 text-xs leading-relaxed text-sky-50/95">
+          Mostre suas habilidades e seja encontrado por quem precisa do seu serviço.
+        </p>
       </div>
+      <Link
+        to={isAuthenticated ? "/anunciar" : "/entrar"}
+        state={{
+          listingType: "PROFESSIONAL_PROFILE",
+          ...(isAuthenticated ? {} : { redirect: "/anunciar" }),
+        }}
+        className="mt-3 inline-flex w-fit rounded-full bg-white px-4 py-2 text-xs font-bold text-sky-700 shadow-md active:scale-95"
+      >
+        Criar perfil profissional
+      </Link>
     </div>
   );
 }
 
 function SlideContent({ variant }: { variant: HeroSlide["variant"] }) {
-  if (variant === "sky-promo") return <SkyPromoSlide />;
-  if (variant === "blue-pro") return <BlueProSlide />;
-  return <SkyCategorySlide />;
+  if (variant === "find-service") return <FindServiceSlide />;
+  if (variant === "post-service") return <PostServiceSlide />;
+  return <PostProfileSlide />;
 }
 
 export function HomeHeroCarousel() {
@@ -204,7 +173,7 @@ export function HomeHeroCarousel() {
     <section
       className="relative w-full select-none"
       aria-roledescription="carousel"
-      aria-label="Promoções Papufy"
+      aria-label="Ações no Papufy"
       onMouseEnter={() => {
         paused.current = true;
       }}
@@ -244,22 +213,20 @@ export function HomeHeroCarousel() {
         <IconChevron direction="right" />
       </button>
 
-      <div className="absolute bottom-2 left-0 right-0 flex flex-col items-center gap-1">
-        <div className="flex items-center justify-center gap-1.5">
-          {HERO_SLIDES.map((slide, i) => (
-            <button
-              key={slide.id}
-              type="button"
-              onClick={() => goTo(i)}
-              aria-label={`Ir para slide ${i + 1}`}
-              className={`rounded-full transition-all ${
-                i === index
-                  ? "h-2 w-5 bg-sky-500 shadow-sm"
-                  : "h-2 w-2 bg-white/90"
-              }`}
-            />
-          ))}
-        </div>
+      <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5">
+        {HERO_SLIDES.map((slide, i) => (
+          <button
+            key={slide.id}
+            type="button"
+            onClick={() => goTo(i)}
+            aria-label={`Ir para slide ${i + 1}`}
+            className={`rounded-full transition-all ${
+              i === index
+                ? "h-2 w-5 bg-sky-500 shadow-sm"
+                : "h-2 w-2 bg-white/90"
+            }`}
+          />
+        ))}
       </div>
     </section>
   );

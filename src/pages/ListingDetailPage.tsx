@@ -1,19 +1,23 @@
-import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { SafeText } from "../components/SafeText";
-import { PaymentCheckoutSheet } from "../components/mobile/PaymentCheckoutSheet";
 import { MobileShell } from "../components/mobile/MobileShell";
 import { CATEGORY_META } from "../constants/categories";
+import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
 import type { Listing } from "../types";
 import { formatLocation, formatPrice } from "../utils/format";
 
 export function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
+  const { showToast } = useToast();
   const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [contactLoading, setContactLoading] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -27,13 +31,35 @@ export function ListingDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const pixCode = useMemo(() => {
-    if (!listing) return "";
-    const value = listing.aCombinar
-      ? "0.00"
-      : (listing.preco ?? 0).toFixed(2);
-    return `00020126580014BR.GOV.BCB.PIX0136papufy@pagamento520400005303986540${value}5802BR5925PAPUFY MARKETPLACE6009SAO PAULO62070503***6304ABCD`;
-  }, [listing]);
+  const handleContact = async () => {
+    if (!listing) return;
+
+    if (!isAuthenticated) {
+      navigate("/entrar", {
+        state: { redirect: `/anuncio/${listing.id}` },
+      });
+      return;
+    }
+
+    if (listing.userId === user?.id) {
+      showToast("Este é o seu anúncio.", "info");
+      navigate("/minhas-publicacoes");
+      return;
+    }
+
+    setContactLoading(true);
+    try {
+      const { conversationId } = await api.chat.startListing(listing.id);
+      navigate(`/chat/${conversationId}`);
+    } catch (err) {
+      showToast(
+        err instanceof Error ? err.message : "Não foi possível abrir o chat.",
+        "error"
+      );
+    } finally {
+      setContactLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -66,8 +92,14 @@ export function ListingDetailPage() {
   const meta = CATEGORY_META[listing.categoria] ?? CATEGORY_META.Outros;
   const isBico =
     listing.listingType === "JOB_VACANCY" || listing.tipo === "BICO";
+  const isOwner = listing.userId === user?.id;
   const cover = listing.imagemCapa;
   const showImage = Boolean(cover && !cover.includes("placeholders/"));
+  const ctaLabel = isOwner
+    ? "Gerenciar meu anúncio"
+    : isBico
+      ? "Quero fazer esse serviço"
+      : "Contratar profissional";
 
   return (
     <MobileShell>
@@ -95,7 +127,7 @@ export function ListingDetailPage() {
               : "bg-sky-100 text-sky-800"
           }`}
         >
-          {isBico ? "[Pedido de serviço]" : "[Profissional disponível]"}
+          {isBico ? "Pedido de serviço" : "Profissional disponível"}
         </span>
 
         <h1 className="text-xl font-bold text-slate-900">{listing.titulo}</h1>
@@ -121,23 +153,16 @@ export function ListingDetailPage() {
         </p>
       </article>
 
-      <div className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-md">
+      <div className="fixed bottom-[calc(8.25rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-md lg:bottom-0">
         <button
           type="button"
-          onClick={() => setCheckoutOpen(true)}
-          className="h-12 w-full rounded-2xl bg-gradient-to-r from-sky-500 to-blue-500 text-base font-bold text-white shadow-lg shadow-sky-200/50 active:scale-[0.98]"
+          onClick={handleContact}
+          disabled={contactLoading}
+          className="h-12 w-full rounded-2xl bg-gradient-to-r from-sky-500 to-blue-500 text-base font-bold text-white shadow-lg shadow-sky-200/50 active:scale-[0.98] disabled:opacity-70"
         >
-          Pagar com Pix
+          {contactLoading ? "Abrindo chat..." : ctaLabel}
         </button>
       </div>
-
-      <PaymentCheckoutSheet
-        open={checkoutOpen}
-        onClose={() => setCheckoutOpen(false)}
-        title={listing.titulo}
-        amountLabel={formatPrice(listing.preco ?? null, listing.aCombinar)}
-        pixCopyPaste={pixCode}
-      />
     </MobileShell>
   );
 }

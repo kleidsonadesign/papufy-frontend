@@ -10,6 +10,7 @@ import { HomeHeroCarousel } from "./HomeHeroCarousel";
 import { RecentJobsGrid } from "./RecentJobsGrid";
 
 const FEATURED_COUNT = 6;
+const PROFESSIONALS_COUNT = 8;
 
 export function AppPageHome() {
   const { filters, locationLabel, locationDetecting } = useFilters();
@@ -40,6 +41,22 @@ export function AppPageHome() {
     ]
   );
 
+  const professionalsQuery = useMemo(
+    () => ({
+      search: debouncedSearch || undefined,
+      category: filters.category || undefined,
+      tipo: "PROFESSIONAL_PROFILE" as const,
+      uf: filters.uf,
+      cidade: filters.cidade,
+    }),
+    [
+      debouncedSearch,
+      filters.category,
+      filters.uf,
+      filters.cidade,
+    ]
+  );
+
   const {
     listings,
     loading,
@@ -49,6 +66,14 @@ export function AppPageHome() {
     loadMore,
     refresh,
   } = useInfiniteListings(query, { enabled: !locationDetecting });
+
+  const {
+    listings: professionalListings,
+    loading: professionalsLoading,
+    refresh: refreshProfessionals,
+  } = useInfiniteListings(professionalsQuery, {
+    enabled: !locationDetecting,
+  });
 
   useEffect(() => {
     const el = sentinelRef.current;
@@ -67,7 +92,13 @@ export function AppPageHome() {
 
   const handleRefresh = useCallback(() => {
     refresh();
-  }, [refresh]);
+    refreshProfessionals();
+  }, [refresh, refreshProfessionals]);
+
+  const featuredProfessionals = professionalListings.slice(
+    0,
+    PROFESSIONALS_COUNT
+  );
 
   const featuredListings = listings.slice(0, FEATURED_COUNT);
   const moreListings = listings.slice(FEATURED_COUNT);
@@ -114,7 +145,11 @@ export function AppPageHome() {
           subtitle={featuredSubtitle}
         />
 
-        <FeaturedProfessionalsScroll />
+        <FeaturedProfessionalsScroll
+          listings={featuredProfessionals}
+          loading={professionalsLoading}
+          locationLabel={locationLabel}
+        />
 
         {showMoreSection && (
           <section>
@@ -183,7 +218,7 @@ export function AppPageHome() {
       <FilterBottomSheet
         open={filtersOpen}
         onClose={() => setFiltersOpen(false)}
-        onApply={refresh}
+        onApply={handleRefresh}
       />
     </div>
   );

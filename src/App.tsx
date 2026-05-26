@@ -16,6 +16,7 @@ import { LoginPage } from "./pages/LoginPage";
 import { MyJobsPage } from "./pages/MyJobsPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { ProfilePage } from "./pages/ProfilePage";
+import { NotificationsPage } from "./pages/NotificationsPage";
 import { SearchPage } from "./pages/SearchPage";
 
 export default function App() {
@@ -58,6 +59,14 @@ export default function App() {
                   element={
                     <ProtectedRoute>
                       <ChatPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/notificacoes"
+                  element={
+                    <ProtectedRoute>
+                      <NotificationsPage />
                     </ProtectedRoute>
                   }
                 />
