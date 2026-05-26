@@ -167,11 +167,10 @@ export function LoginPage() {
     <div className="min-h-[100dvh] bg-sky-50/30 px-4 py-8 sm:py-12">
       <div className="mx-auto flex w-full max-w-md flex-col">
         <header className="mb-8 flex flex-col items-center text-center">
-          <PapufyLogo className="h-12 w-auto max-w-[12rem] object-contain sm:h-14" />
-          <h1 className="mt-4 font-display text-2xl font-extrabold tracking-tight text-sky-500 sm:text-3xl">
-            Papufy
+          <h1 className="m-0">
+            <PapufyLogo className="h-12 w-auto max-w-[12rem] object-contain sm:h-14" />
           </h1>
-          <p className="mt-2 max-w-xs text-sm text-slate-500">
+          <p className="mt-4 max-w-xs text-sm text-slate-500">
             Acesse para anunciar serviços ou demonstrar interesse.
           </p>
         </header>

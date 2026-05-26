@@ -1,20 +1,24 @@
-import { SCROLL_CATEGORIES } from "../../constants/categories";
+import {
+  MACRO_SCROLL_CATEGORIES,
+  type ListingTypeFilter,
+} from "../../constants/categories";
 import { useFilters } from "../../context/FilterContext";
+import type { JobFilters } from "../../context/FilterContext";
 
-const ICON_BG: Record<string, string> = {
-  all: "bg-gradient-to-br from-sky-400 to-blue-500 text-white shadow-md shadow-sky-200/60",
-  vacancy: "bg-gradient-to-br from-sky-400 to-blue-600 text-white",
-  produto: "bg-gradient-to-br from-violet-400 to-purple-700 text-white",
-  default: "bg-gradient-to-br from-gray-50 to-gray-100 text-2xl",
-};
-
-function iconBg(id: string, isActive: boolean): string {
-  if (isActive && id === "all") return ICON_BG.all;
-  if (isActive) return "bg-sky-500 text-white ring-2 ring-sky-200 shadow-md";
-  if (id === "all") return "bg-gradient-to-br from-sky-500 to-blue-600 text-white";
-  if (id === "vacancy") return ICON_BG.vacancy;
-  if (id === "produto") return ICON_BG.produto;
-  return ICON_BG.default;
+function resolveActiveMacroId(filters: JobFilters): string {
+  const match = MACRO_SCROLL_CATEGORIES.find((macro) => {
+    if (macro.id === "all") {
+      return filters.tipo === null && filters.category === null;
+    }
+    if (macro.tipo !== null) {
+      return filters.tipo === macro.tipo && filters.category === null;
+    }
+    if (macro.category !== null) {
+      return filters.category === macro.category && filters.tipo === null;
+    }
+    return false;
+  });
+  return match?.id ?? "all";
 }
 
 interface CategoryScrollProps {
@@ -23,41 +27,46 @@ interface CategoryScrollProps {
 
 export function CategoryScroll({ onChange }: CategoryScrollProps) {
   const { filters, setCategory, setTipo } = useFilters();
+  const activeId = resolveActiveMacroId(filters);
 
-  const activeId =
-    SCROLL_CATEGORIES.find(
-      (c) =>
-        (c.tipo === filters.tipo || (!c.tipo && !filters.tipo)) &&
-        ("category" in c ? c.category === filters.category : !filters.category)
-    )?.id ?? "all";
+  const applyMacro = (
+    tipo: ListingTypeFilter,
+    category: string | null
+  ) => {
+    setTipo(tipo);
+    setCategory(category);
+    onChange?.();
+  };
 
   return (
-    <section aria-label="Categorias">
+    <section aria-label="Categorias" className="border-b border-slate-100/80 bg-white">
       <div
-        className="scrollbar-hide page-container flex gap-3 overflow-x-auto pb-1 pt-1 touch-pan-x snap-x-mandatory"
+        className="scrollbar-hide flex flex-nowrap gap-4 overflow-x-auto px-4 py-2 touch-pan-x"
         style={{ WebkitOverflowScrolling: "touch" }}
       >
-        {SCROLL_CATEGORIES.map((item) => {
+        {MACRO_SCROLL_CATEGORIES.map((item) => {
           const isActive = activeId === item.id;
           return (
             <button
               key={item.id}
               type="button"
-              onClick={() => {
-                setTipo(item.tipo);
-                setCategory("category" in item ? item.category! : null);
-                onChange?.();
-              }}
-              className="snap-start flex w-[76px] shrink-0 flex-col items-center gap-2 active:scale-95"
+              onClick={() => applyMacro(item.tipo, item.category)}
+              className="flex w-[4.25rem] shrink-0 flex-col items-center gap-1.5 active:scale-95"
             >
               <span
-                className={`flex h-[52px] w-[52px] items-center justify-center rounded-2xl text-[22px] transition ${iconBg(item.id, isActive)}`}
+                className={`flex h-12 w-12 items-center justify-center rounded-full border text-xl transition ${
+                  isActive
+                    ? "border-sky-300 bg-sky-50"
+                    : "border-slate-100 bg-white"
+                }`}
               >
                 {item.icon}
               </span>
               <span
-                className={`line-clamp-2 w-full text-center text-[11px] font-semibold leading-tight ${
-                  isActive ? "text-sky-600" : "text-papufy-text"
+                className={`line-clamp-2 w-full text-center text-[11px] leading-tight ${
+                  isActive
+                    ? "font-semibold text-sky-600"
+                    : "font-medium text-slate-500"
                 }`}
               >
                 {item.label}

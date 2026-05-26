@@ -115,32 +115,51 @@ export const CATEGORY_META: Record<
   },
 };
 
-export const SCROLL_CATEGORIES = [
-  { id: "all", label: "Todos", icon: "✨", tipo: null as ListingTypeFilter },
+/** Macro-categorias do carrossel da home (sem subcategorias redundantes). */
+export const MACRO_SCROLL_CATEGORIES = [
   {
-    id: "bico",
-    label: "Pedidos",
-    icon: "🛠️",
-    tipo: "JOB_VACANCY" as const,
+    id: "all",
+    label: "Todos",
+    icon: "✨",
+    tipo: null as ListingTypeFilter,
+    category: null as string | null,
   },
   {
-    id: "pro",
+    id: "pedidos",
+    label: "Pedidos",
+    icon: "📋",
+    tipo: "JOB_VACANCY" as const,
+    category: null as string | null,
+  },
+  {
+    id: "profissionais",
     label: "Profissionais",
     icon: "👷",
     tipo: "PROFESSIONAL_PROFILE" as const,
+    category: null as string | null,
   },
-  ...BICO_CATEGORIES.map((c) => ({
-    id: `bico-${c}`,
-    label: c.split(" ")[0],
-    icon: CATEGORY_META[c]?.icon ?? "📌",
-    tipo: "JOB_VACANCY" as const,
-    category: c,
-  })),
-  ...PROFESSIONAL_CATEGORIES.slice(0, 4).map((c) => ({
-    id: `pro-${c}`,
-    label: c.split(" ")[0],
-    icon: CATEGORY_META[c]?.icon ?? "👷",
-    tipo: "PROFESSIONAL_PROFILE" as const,
-    category: c,
-  })),
-];
+  {
+    id: "assistencia",
+    label: "Assistência",
+    icon: "🔧",
+    tipo: null as ListingTypeFilter,
+    category: "Assistência Técnica",
+  },
+  {
+    id: "reformas",
+    label: "Reformas",
+    icon: "🏗️",
+    tipo: null as ListingTypeFilter,
+    category: "Reformas e Reparos",
+  },
+  {
+    id: "servicos",
+    label: "Serviços",
+    icon: "🧹",
+    tipo: null as ListingTypeFilter,
+    category: "Serviços Domésticos",
+  },
+] as const;
+
+/** @deprecated Use MACRO_SCROLL_CATEGORIES */
+export const SCROLL_CATEGORIES = MACRO_SCROLL_CATEGORIES;

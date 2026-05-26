@@ -35,7 +35,7 @@ function SkyPromoSlide() {
   return (
     <div className="relative flex h-full min-h-[200px] flex-col overflow-hidden rounded-2xl bg-gradient-to-r from-sky-400 to-blue-500 px-3 pb-10 pt-3 shadow-lg shadow-sky-200/50 sm:min-h-[220px] sm:px-4">
       <p className="text-center text-sm font-extrabold leading-tight text-white sm:text-base">
-        Papufy: Sua grana extra rápida.
+        Sua grana extra rápida.
       </p>
 
       <div className="relative mt-2 flex flex-1 items-stretch gap-1 sm:mt-3">

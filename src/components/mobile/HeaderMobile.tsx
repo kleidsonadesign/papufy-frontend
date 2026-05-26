@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useChat } from "../../context/ChatContext";
+import { PapufyLogo } from "../PapufyLogo";
 import { IconChat } from "../icons/NavIcons";
 
 function IconChevronDown({ className = "h-4 w-4" }: { className?: string }) {
@@ -41,16 +42,14 @@ export function HeaderMobile() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-slate-100 bg-white">
+    <header className="sticky top-0 z-50 w-full border-b border-slate-100/80 bg-white">
       <div className="flex h-16 w-full items-center justify-between px-4">
         <Link
           to="/"
-          className="shrink-0 active:opacity-80"
+          className="flex shrink-0 items-center active:opacity-85"
           aria-label="Papufy — início"
         >
-          <span className="font-display text-xl font-bold tracking-tight text-sky-500">
-            Papufy
-          </span>
+          <PapufyLogo className="h-8 w-auto max-w-[8.5rem] object-contain object-left sm:h-9 sm:max-w-[9.5rem]" />
         </Link>
 
         <div className="flex items-center gap-4">
@@ -64,7 +63,7 @@ export function HeaderMobile() {
                 : "Chat"
             }
           >
-            <IconChat className="h-6 w-6" />
+            <IconChat className="h-6 w-6 text-sky-600" />
             {isAuthenticated && unreadCount > 0 && (
               <span className="absolute -right-0.5 -top-0.5 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-sky-500 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white">
                 {unreadCount > 9 ? "9+" : unreadCount}
