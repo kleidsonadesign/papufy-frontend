@@ -1,10 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { Layout } from "../components/Layout";
 import { UploadZone } from "../components/mobile/UploadZone";
+import { IconUser } from "../components/icons/NavIcons";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { BRAZIL_STATES } from "../constants/categories";
 import { api } from "../lib/api";
+import {
+  getProfilePhotoUrl,
+  removeProfilePhotoUrl,
+  setProfilePhotoUrl,
+} from "../lib/profilePhoto";
 import type { Certificate } from "../types";
 
 export function ProfilePage() {
@@ -14,6 +20,7 @@ export function ProfilePage() {
   const [curriculoProgress, setCurriculoProgress] = useState<number | undefined>();
   const [certProgress, setCertProgress] = useState<number | undefined>();
   const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const [photoUploading, setPhotoUploading] = useState(false);
 
   const [nome, setNome] = useState(user?.nome ?? "");
   const [telefone, setTelefone] = useState(user?.telefone ?? "");
@@ -21,6 +28,9 @@ export function ProfilePage() {
   const [uf, setUf] = useState(user?.uf ?? "PB");
   const [senhaAtual, setSenhaAtual] = useState("");
   const [novaSenha, setNovaSenha] = useState("");
+  const [profilePhoto, setProfilePhoto] = useState<string | null>(
+    getProfilePhotoUrl(user?.id)
+  );
 
   const loadCerts = useCallback(async () => {
     try {
@@ -98,6 +108,38 @@ export function ProfilePage() {
     }
   };
 
+  const handleProfilePhoto = async (file?: File) => {
+    if (!file || !user?.id) return;
+    if (!file.type.startsWith("image/")) {
+      showToast("Selecione uma imagem válida.", "error");
+      return;
+    }
+
+    setPhotoUploading(true);
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result));
+        reader.onerror = () => reject(new Error("Erro ao ler imagem"));
+        reader.readAsDataURL(file);
+      });
+      setProfilePhoto(dataUrl);
+      setProfilePhotoUrl(user.id, dataUrl);
+      showToast("Foto de perfil atualizada.", "success");
+    } catch {
+      showToast("Não foi possível salvar a foto de perfil.", "error");
+    } finally {
+      setPhotoUploading(false);
+    }
+  };
+
+  const clearProfilePhoto = () => {
+    if (!user?.id) return;
+    removeProfilePhotoUrl(user.id);
+    setProfilePhoto(null);
+    showToast("Foto de perfil removida.", "info");
+  };
+
   return (
     <Layout showCategories={false}>
       <div className="page-container mx-auto max-w-lg space-y-6 py-5 sm:py-8">
@@ -109,6 +151,44 @@ export function ProfilePage() {
             {user?.email} · Currículo e certificados pelo celular
           </p>
         </div>
+
+        <section className="space-y-4 rounded-2xl border border-papufy-border bg-white p-4 shadow-sm sm:p-6">
+          <h2 className="font-bold text-papufy-text">Foto de perfil</h2>
+          <div className="flex items-center gap-4">
+            <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-200 text-slate-500">
+              {profilePhoto ? (
+                <img
+                  src={profilePhoto}
+                  alt="Foto de perfil"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <IconUser className="h-8 w-8" />
+              )}
+            </span>
+            <div className="space-y-2">
+              <label className="inline-flex cursor-pointer items-center rounded-lg border border-sky-300 px-3 py-2 text-sm font-semibold text-sky-700">
+                {photoUploading ? "Enviando..." : "Escolher foto"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={photoUploading}
+                  onChange={(e) => void handleProfilePhoto(e.target.files?.[0])}
+                />
+              </label>
+              {profilePhoto && (
+                <button
+                  type="button"
+                  onClick={clearProfilePhoto}
+                  className="block text-xs font-semibold text-red-600"
+                >
+                  Remover foto
+                </button>
+              )}
+            </div>
+          </div>
+        </section>
 
         <section className="space-y-4 rounded-2xl border border-papufy-border bg-white p-4 shadow-sm sm:p-6">
           <h2 className="font-bold text-papufy-text">Documentos</h2>

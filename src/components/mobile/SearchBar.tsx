@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BRAZIL_STATES } from "../../constants/categories";
 import { useFilters } from "../../context/FilterContext";
+import { getCitiesByUf } from "../../lib/brazilCities";
 import { IconSearch } from "../icons/NavIcons";
 
 const RECENT_KEY = "papufy_recent_searches";
@@ -47,6 +48,7 @@ export function SearchBar({
   const [fullscreen, setFullscreen] = useState(autoFocusFullscreen);
   const [cidade, setCidade] = useState(filters.cidade);
   const [uf, setUf] = useState(filters.uf);
+  const [cities, setCities] = useState<string[]>([]);
   const [recent, setRecent] = useState<string[]>(loadRecent);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -54,6 +56,29 @@ export function SearchBar({
     setCidade(filters.cidade);
     setUf(filters.uf);
   }, [filters.cidade, filters.uf]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const run = async () => {
+      try {
+        const ufCities = await getCitiesByUf(uf);
+        if (cancelled) return;
+
+        setCities(ufCities);
+        if (ufCities.length > 0 && !ufCities.includes(cidade)) {
+          setCidade(ufCities[0]);
+        }
+      } catch {
+        if (!cancelled) setCities([]);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [uf, cidade]);
 
   useEffect(() => {
     if (fullscreen) {
@@ -186,14 +211,23 @@ export function SearchBar({
                   </option>
                 ))}
               </select>
-              <input
-                type="text"
+              <select
                 value={cidade}
                 onChange={(e) => setCidade(e.target.value)}
-                placeholder="Cidade"
                 className="input-field h-11 min-w-0 flex-1 rounded-xl"
                 aria-label="Cidade"
-              />
+                disabled={cities.length === 0}
+              >
+                {cities.length === 0 ? (
+                  <option value={cidade}>{cidade || "Cidade"}</option>
+                ) : (
+                  cities.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))
+                )}
+              </select>
             </div>
             <p className="mt-2 text-center text-[10px] text-slate-400">
               A localização é detectada automaticamente. Altere cidade/UF só se

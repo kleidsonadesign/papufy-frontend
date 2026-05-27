@@ -9,6 +9,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
+import { lookupCep, normalizeCep } from "../lib/cep";
 
 type Step = 1 | 2 | 3;
 type ListingType = "JOB_VACANCY" | "PROFESSIONAL_PROFILE";
@@ -20,6 +21,7 @@ export function CreateJobPage() {
   const { showToast } = useToast();
   const [step, setStep] = useState<Step>(1);
   const [submitting, setSubmitting] = useState(false);
+  const [cepLoading, setCepLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const initialType = (location.state as { listingType?: ListingType } | null)
@@ -35,6 +37,7 @@ export function CreateJobPage() {
   const [descricao, setDescricao] = useState("");
   const [categoria, setCategoria] = useState<string>(categories[0]);
   const [cep, setCep] = useState("");
+  const [rua, setRua] = useState("");
   const [cidade, setCidade] = useState(user?.cidade || "Campina Grande");
   const [bairro, setBairro] = useState("");
   const [uf, setUf] = useState(user?.uf || "PB");
@@ -42,7 +45,8 @@ export function CreateJobPage() {
     `${user?.cidade || "Campina Grande"} e região`
   );
   const [preco, setPreco] = useState("");
-  const [aCombinar, setACombinar] = useState(false);
+  const [precoMin, setPrecoMin] = useState("");
+  const [precoMax, setPrecoMax] = useState("");
   const [telefone, setTelefone] = useState(user?.telefone || "");
   const [imagens, setImagens] = useState<File[]>([]);
 
@@ -71,7 +75,7 @@ export function CreateJobPage() {
             descLabel: "Descrição das habilidades",
             descPlaceholder:
               "Conte sua experiência, certificações e diferenciais.",
-            moneyLabel: "Valor da diária/hora (R$)",
+            moneyLabel: "Faixa de preço (R$)",
             moneyPlaceholder: "200",
             phoneHint:
               "Clientes usarão este contato ao clicar em 'Contratar Profissional'.",
@@ -86,13 +90,50 @@ export function CreateJobPage() {
     return Number.isFinite(num) ? num : 0;
   };
 
+  const parsedRange = () => {
+    const min = parseFloat(precoMin.replace(/[^\d,]/g, "").replace(",", "."));
+    const max = parseFloat(precoMax.replace(/[^\d,]/g, "").replace(",", "."));
+    return {
+      min: Number.isFinite(min) ? min : 0,
+      max: Number.isFinite(max) ? max : 0,
+    };
+  };
+
   const canNext =
     (step === 1 && titulo.trim().length >= 5 && descricao.trim().length >= 20) ||
     (step === 2 &&
       cidade.trim().length >= 2 &&
       uf.length === 2 &&
       telefone.trim().length >= 8) ||
-    (step === 3 && (aCombinar || parsedPreco() > 0));
+    (step === 3 &&
+      (listingType === "JOB_VACANCY"
+        ? parsedPreco() > 0
+        : parsedRange().min > 0 &&
+          parsedRange().max > 0 &&
+          parsedRange().max >= parsedRange().min));
+
+  const handleCepChange = async (value: string) => {
+    const masked = value
+      .replace(/\D/g, "")
+      .slice(0, 8)
+      .replace(/(\d{5})(\d{0,3})/, (_m, p1, p2) => (p2 ? `${p1}-${p2}` : p1));
+    setCep(masked);
+
+    const normalized = normalizeCep(masked);
+    if (normalized.length !== 8) return;
+
+    setCepLoading(true);
+    try {
+      const result = await lookupCep(normalized);
+      if (!result) return;
+      if (result.logradouro) setRua(result.logradouro);
+      if (result.bairro) setBairro(result.bairro);
+      if (result.cidade) setCidade(result.cidade);
+      if (result.uf) setUf(result.uf);
+    } finally {
+      setCepLoading(false);
+    }
+  };
 
   const handleSubmit = async () => {
     setError(null);
@@ -101,15 +142,26 @@ export function CreateJobPage() {
       const formData = new FormData();
       formData.append("listingType", listingType);
       formData.append("titulo", titulo.trim());
-      formData.append("descricao", descricao.trim());
+      const { min, max } = parsedRange();
+      const finalDescription =
+        listingType === "PROFESSIONAL_PROFILE"
+          ? `${descricao.trim()}\n\nFaixa de preço: R$ ${min.toFixed(
+              2
+            )} até R$ ${max.toFixed(2)}.`
+          : descricao.trim();
+      formData.append("descricao", finalDescription);
       formData.append("categoria", categoria);
       formData.append("cep", cep.trim());
       formData.append("cidade", cidade.trim());
       formData.append("bairro", bairro.trim());
       formData.append("uf", uf);
       formData.append("telefone", telefone.trim());
-      formData.append("aCombinar", String(aCombinar));
-      if (!aCombinar) formData.append("preco", String(parsedPreco()));
+      formData.append("aCombinar", "false");
+      if (listingType === "JOB_VACANCY") {
+        formData.append("preco", String(parsedPreco()));
+      } else {
+        formData.append("preco", String((min + max) / 2));
+      }
       if (listingType === "PROFESSIONAL_PROFILE") {
         formData.append("raioAtuacao", raioAtuacao.trim());
       }
@@ -199,9 +251,23 @@ export function CreateJobPage() {
                 <label className="text-sm font-medium">CEP (opcional)</label>
                 <input
                   value={cep}
-                  onChange={(e) => setCep(e.target.value)}
+                  onChange={(e) => void handleCepChange(e.target.value)}
                   placeholder="00000-000"
                   inputMode="numeric"
+                  className="mt-1 w-full rounded-lg border border-papufy-border px-4 py-3 text-sm outline-none focus:border-papufy-orange"
+                />
+                {cepLoading && (
+                  <p className="mt-1 text-xs text-papufy-muted">
+                    Buscando endereço pelo CEP...
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="text-sm font-medium">Rua</label>
+                <input
+                  value={rua}
+                  onChange={(e) => setRua(e.target.value)}
+                  placeholder="Logradouro"
                   className="mt-1 w-full rounded-lg border border-papufy-border px-4 py-3 text-sm outline-none focus:border-papufy-orange"
                 />
               </div>
@@ -266,16 +332,7 @@ export function CreateJobPage() {
           {step === 3 && (
             <div className="space-y-4">
               <h2 className="font-bold text-papufy-text">Valores e imagens</h2>
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={aCombinar}
-                  onChange={(e) => setACombinar(e.target.checked)}
-                  className="h-4 w-4 accent-papufy-orange"
-                />
-                <span className="text-sm">A combinar</span>
-              </label>
-              {!aCombinar && (
+              {listingType === "JOB_VACANCY" && (
                 <div>
                   <label className="text-sm font-medium">{labels.moneyLabel}</label>
                   <input
@@ -287,6 +344,47 @@ export function CreateJobPage() {
                     placeholder={labels.moneyPlaceholder}
                     className="mt-1 w-full rounded-lg border border-papufy-border px-4 py-3 text-sm outline-none focus:border-papufy-orange"
                   />
+                  <p className="mt-1 text-xs text-papufy-muted">
+                    Papufy cobra uma taxa de 7% por transações dentro do app.
+                  </p>
+                </div>
+              )}
+              {listingType === "PROFESSIONAL_PROFILE" && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label className="text-sm font-medium">Valor mínimo (R$)</label>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min={1}
+                      value={precoMin}
+                      onChange={(e) => setPrecoMin(e.target.value)}
+                      placeholder="100"
+                      className="mt-1 w-full rounded-lg border border-papufy-border px-4 py-3 text-sm outline-none focus:border-papufy-orange"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">Valor máximo (R$)</label>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      min={1}
+                      value={precoMax}
+                      onChange={(e) => setPrecoMax(e.target.value)}
+                      placeholder="350"
+                      className="mt-1 w-full rounded-lg border border-papufy-border px-4 py-3 text-sm outline-none focus:border-papufy-orange"
+                    />
+                  </div>
+                  <p className="text-xs text-papufy-muted sm:col-span-2">
+                    Papufy cobra uma taxa de 7% por transações dentro do app.
+                  </p>
+                  {parsedRange().max > 0 &&
+                    parsedRange().min > 0 &&
+                    parsedRange().max < parsedRange().min && (
+                      <p className="text-xs text-red-600 sm:col-span-2">
+                        O valor máximo deve ser maior ou igual ao valor mínimo.
+                      </p>
+                    )}
                 </div>
               )}
               <div>

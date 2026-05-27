@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { IconChevronDown } from "./icons/NavIcons";
+import { getProfilePhotoUrl } from "../lib/profilePhoto";
+import { IconChevronDown, IconUser } from "./icons/NavIcons";
 
 interface UserMenuProps {
   variant?: "header" | "compact";
@@ -25,8 +26,8 @@ export function UserMenu({ variant = "header" }: UserMenuProps) {
 
   if (!user) return null;
 
-  const initial = user.nome.charAt(0).toUpperCase();
   const displayName = user.nome.split(" ")[0];
+  const profilePhoto = getProfilePhotoUrl(user.id);
 
   return (
     <div className="relative" ref={ref}>
@@ -36,18 +37,26 @@ export function UserMenu({ variant = "header" }: UserMenuProps) {
         className={
           variant === "compact"
             ? "flex flex-col items-center gap-0.5 rounded-lg px-1 py-1"
-            : "flex items-center gap-2 rounded-lg py-1 pl-1 pr-2 transition hover:bg-gray-50"
+            : "flex items-center gap-1.5 rounded-lg py-1 pl-1 pr-2 transition hover:bg-gray-50"
         }
       >
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-sky-200 to-papufy-orange text-sm font-bold text-white">
-          {initial}
+        <span className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-slate-200 text-slate-500">
+          {profilePhoto ? (
+            <img
+              src={profilePhoto}
+              alt="Foto de perfil"
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <IconUser className="h-5 w-5" />
+          )}
         </span>
         {variant === "header" && (
           <>
-            <span className="max-w-[90px] truncate text-sm font-medium text-papufy-text">
+            <span className="max-w-[74px] truncate text-xs font-medium text-papufy-text">
               {displayName}
             </span>
-            <IconChevronDown className="text-papufy-muted" />
+            <IconChevronDown className="h-3.5 w-3.5 text-papufy-muted" />
           </>
         )}
         {variant === "compact" && (
@@ -58,7 +67,7 @@ export function UserMenu({ variant = "header" }: UserMenuProps) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-52 overflow-hidden rounded-xl border border-papufy-border bg-white py-1 shadow-xl">
+        <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-xl border border-papufy-border bg-white py-1 shadow-xl">
           <Link
             to="/minhas-publicacoes"
             className="block px-4 py-2.5 text-sm hover:bg-sky-50"

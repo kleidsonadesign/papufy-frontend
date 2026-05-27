@@ -9,6 +9,8 @@ import type {
   JobInterestItem,
   Listing,
   ListingsPage,
+  SupportTicket,
+  Transaction,
   User,
 } from "../types";
 import { getApiBaseUrl } from "./env";
@@ -363,12 +365,51 @@ export const api = {
         { method: "POST", body: JSON.stringify({ content }) }
       ),
 
+    sendProposal: (conversationId: string, value: number) =>
+      request<{ message: ChatMessage }>(
+        `/chat/conversations/${conversationId}/proposal`,
+        { method: "POST", body: JSON.stringify({ value }) }
+      ),
+
     unread: () => request<{ count: number }>("/chat/unread"),
 
     startListing: (listingId: string) =>
       request<{ conversationId: string }>(`/chat/listings/${listingId}/start`, {
         method: "POST",
       }),
+  },
+
+  payments: {
+    checkoutFromProposal: (
+      messageId: string,
+      billingType: "PIX" | "CREDIT_CARD" = "PIX"
+    ) =>
+      request<{
+        transaction: Transaction;
+        pix: { encodedImage?: string; payload?: string };
+      }>(`/payments/proposals/${messageId}/checkout`, {
+        method: "POST",
+        body: JSON.stringify({ billingType }),
+      }),
+
+    transactionStatus: (transactionId: string) =>
+      request<{ transaction: Transaction }>(
+        `/payments/transactions/${transactionId}/status`
+      ),
+
+    reportProblem: (
+      transactionId: string,
+      descricao: string,
+      comprovante?: File
+    ) => {
+      const fd = new FormData();
+      fd.append("descricao", descricao);
+      if (comprovante) fd.append("comprovante", comprovante);
+      return uploadRequest<{ ticket: SupportTicket }>(
+        `/payments/transactions/${transactionId}/report`,
+        fd
+      );
+    },
   },
 };
 

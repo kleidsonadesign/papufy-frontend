@@ -1,6 +1,13 @@
 export function formatPrice(preco: number | null, aCombinar: boolean): string {
-  if (aCombinar || preco == null) {
-    return "A combinar";
+  if (preco == null) {
+    return "Preço não informado";
+  }
+  if (aCombinar) {
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+      maximumFractionDigits: 0,
+    }).format(preco);
   }
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",

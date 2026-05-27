@@ -8,6 +8,8 @@ interface PaymentCheckoutSheetProps {
   amountLabel: string;
   /** Código copia-e-cola Pix (mock ou API) */
   pixCopyPaste: string;
+  pixQrCodeImage?: string | null;
+  statusLabel?: string;
 }
 
 export function PaymentCheckoutSheet({
@@ -16,6 +18,8 @@ export function PaymentCheckoutSheet({
   title,
   amountLabel,
   pixCopyPaste,
+  pixQrCodeImage,
+  statusLabel,
 }: PaymentCheckoutSheetProps) {
   const [visible, setVisible] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -72,6 +76,9 @@ export function PaymentCheckoutSheet({
         <header className="mb-4 text-center">
           <h2 className="text-lg font-extrabold text-slate-900">{title}</h2>
           <p className="mt-1 text-2xl font-black text-sky-600">{amountLabel}</p>
+          {statusLabel && (
+            <p className="mt-1 text-xs font-semibold text-sky-600">{statusLabel}</p>
+          )}
           <p className="mt-1 text-xs text-slate-500">
             Escaneie o QR Code ou copie o código Pix
           </p>
@@ -79,7 +86,15 @@ export function PaymentCheckoutSheet({
 
         <div className="mx-auto flex max-w-xs flex-col items-center gap-4">
           <div className="rounded-2xl border border-sky-100 bg-sky-50/50 p-4 shadow-inner">
-            <QrCodePlaceholder className="mx-auto scale-110" />
+            {pixQrCodeImage ? (
+              <img
+                src={pixQrCodeImage}
+                alt="QR Code Pix"
+                className="mx-auto h-44 w-44 object-contain"
+              />
+            ) : (
+              <QrCodePlaceholder className="mx-auto scale-110" />
+            )}
           </div>
 
           <p className="break-all rounded-xl bg-slate-50 px-3 py-2 text-center font-mono text-[10px] leading-relaxed text-slate-600">

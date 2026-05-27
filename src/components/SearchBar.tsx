@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { BRAZIL_STATES } from "../constants/categories";
 import { useFilters } from "../context/FilterContext";
+import { getCitiesByUf } from "../lib/brazilCities";
 import { IconSearch } from "./icons/NavIcons";
 
 interface SearchBarProps {
@@ -22,11 +23,35 @@ export function SearchBar({ onSearch, variant = "full" }: SearchBarProps) {
   const [localSearch, setLocalSearch] = useState(filters.search);
   const [cidade, setCidade] = useState(filters.cidade);
   const [uf, setUf] = useState(filters.uf);
+  const [cities, setCities] = useState<string[]>([]);
 
   useEffect(() => {
     setCidade(filters.cidade);
     setUf(filters.uf);
   }, [filters.cidade, filters.uf]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const run = async () => {
+      try {
+        const ufCities = await getCitiesByUf(uf);
+        if (cancelled) return;
+
+        setCities(ufCities);
+        if (ufCities.length > 0 && !ufCities.includes(cidade)) {
+          setCidade(ufCities[0]);
+        }
+      } catch {
+        if (!cancelled) setCities([]);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [uf, cidade]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,9 +67,20 @@ export function SearchBar({ onSearch, variant = "full" }: SearchBarProps) {
     }
   };
 
+  const openSearchPage = () => {
+    const nextCidade = cidade.trim() || filters.cidade;
+    const nextUf = uf || filters.uf;
+    setLocation(nextCidade, nextUf);
+    applySearch(localSearch.trim());
+    navigate("/buscar");
+  };
+
   if (variant === "header") {
     return (
-      <form onSubmit={handleSubmit} className="relative w-full max-w-lg flex-1">
+      <form
+        onSubmit={handleSubmit}
+        className="flex w-full max-w-3xl flex-1 items-stretch overflow-hidden rounded-full border border-papufy-border bg-white shadow-sm"
+      >
         <input
           type="text"
           value={localSearch}
@@ -57,15 +93,48 @@ export function SearchBar({ onSearch, variant = "full" }: SearchBarProps) {
               ? "Detectando localização..."
               : `Buscar em ${locationLabel}...`
           }
-          className="w-full rounded-full border border-papufy-border bg-white py-3 pl-5 pr-12 text-base text-papufy-text shadow-sm outline-none transition focus:border-papufy-orange focus:ring-2 focus:ring-papufy-orange/20 sm:py-2.5 sm:text-sm"
+          className="min-w-0 flex-1 px-4 py-2.5 text-sm text-papufy-text outline-none placeholder:text-papufy-muted"
           aria-label="Buscar"
         />
+        <div className="flex items-center border-l border-papufy-border bg-gray-50/80 px-2">
+          <select
+            value={uf}
+            onChange={(e) => setUf(e.target.value)}
+            className="max-w-[4rem] cursor-pointer border-0 bg-transparent py-2.5 text-sm font-semibold text-papufy-text outline-none"
+            aria-label="Estado"
+          >
+            {BRAZIL_STATES.map((state) => (
+              <option key={state} value={state}>
+                {state}
+              </option>
+            ))}
+          </select>
+          <select
+            value={cidade}
+            onChange={(e) => setCidade(e.target.value)}
+            className="w-28 cursor-pointer border-0 bg-transparent py-2.5 pl-1 text-sm text-papufy-text outline-none sm:w-36"
+            aria-label="Cidade"
+            title={locationLabel}
+            disabled={cities.length === 0}
+          >
+            {cities.length === 0 ? (
+              <option value={cidade}>{cidade || "Cidade"}</option>
+            ) : (
+              cities.map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))
+            )}
+          </select>
+        </div>
         <button
-          type="submit"
-          className="touch-target absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full text-papufy-muted transition hover:bg-sky-50 hover:text-papufy-orange"
-          aria-label="Buscar"
+          type="button"
+          onClick={openSearchPage}
+          className="flex items-center justify-center rounded-r-full bg-papufy-orange px-4 text-white transition-colors hover:bg-papufy-orange-dark"
+          aria-label="Abrir busca"
         >
-          <IconSearch />
+          <IconSearch className="h-5 w-5" />
         </button>
       </form>
     );
@@ -100,15 +169,24 @@ export function SearchBar({ onSearch, variant = "full" }: SearchBarProps) {
             </option>
           ))}
         </select>
-        <input
-          type="text"
+        <select
           value={cidade}
           onChange={(e) => setCidade(e.target.value)}
-          placeholder="Cidade"
-          className="w-28 border-0 bg-transparent py-3 pl-1 text-sm text-papufy-text outline-none placeholder:text-papufy-muted sm:w-36"
+          className="w-28 cursor-pointer border-0 bg-transparent py-3 pl-1 text-sm text-papufy-text outline-none sm:w-36"
           aria-label="Cidade"
           title={locationLabel}
-        />
+          disabled={cities.length === 0}
+        >
+          {cities.length === 0 ? (
+            <option value={cidade}>{cidade || "Cidade"}</option>
+          ) : (
+            cities.map((city) => (
+              <option key={city} value={city}>
+                {city}
+              </option>
+            ))
+          )}
+        </select>
       </div>
       <button
         type="submit"

@@ -149,6 +149,9 @@ export interface ChatMessage {
   id: string;
   conversationId: string;
   content: string;
+  type?: "TEXT" | "PROPOSAL" | "SYSTEM";
+  proposalValue?: number | null;
+  transactionId?: string | null;
   senderId: string;
   senderNome: string;
   createdAt: string;
@@ -160,6 +163,9 @@ export interface ConversationSummary {
   contextType: "job" | "listing";
   jobId?: string;
   listingId?: string;
+  contractorId?: string;
+  providerId?: string;
+  myRole?: "contractor" | "provider";
   contextTitulo: string;
   contextCategoria: string;
   otherUser: { id: string; nome: string };
@@ -173,7 +179,12 @@ export interface ConversationSummary {
 }
 
 export type BillingType = "PIX" | "CREDIT_CARD";
-export type TransactionStatus = "PENDING" | "PAID" | "FAILED" | "CANCELED";
+export type TransactionStatus =
+  | "PENDING"
+  | "PAID"
+  | "IN_DISPUTE"
+  | "FAILED"
+  | "CANCELED";
 
 export interface Transaction {
   id: string;
@@ -194,6 +205,17 @@ export interface Transaction {
   paidAt?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface SupportTicket {
+  id: string;
+  transactionId?: string | null;
+  conversationId?: string | null;
+  reporterId: string;
+  descricao: string;
+  comprovanteUrl?: string | null;
+  status: "ABERTO" | "EM_ANALISE" | "RESOLVIDO";
+  createdAt: string;
 }
 
 export type ToastType = "success" | "error" | "info";

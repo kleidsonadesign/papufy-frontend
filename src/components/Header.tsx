@@ -2,8 +2,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useChat } from "../context/ChatContext";
 import { useToast } from "../context/ToastContext";
-import { IconBell, IconChat, IconPlus } from "./icons/NavIcons";
+import { IconChat, IconPlus } from "./icons/NavIcons";
 import { HeaderNavItem } from "./HeaderNavItem";
+import { NotificationsMenu } from "./NotificationsMenu";
 import { PapufyLogo } from "./PapufyLogo";
 import { SearchBar } from "./SearchBar";
 import { UserMenu } from "./UserMenu";
@@ -57,15 +58,11 @@ export function Header({ onSearch }: HeaderProps) {
               onClick={handleChat}
               badge={unreadCount}
             />
-            <HeaderNavItem
-              icon={<IconBell />}
-              label="Notificações"
-              onClick={() => navigate("/notificacoes")}
-            />
           </nav>
         )}
 
         <div className="ml-auto flex items-center gap-1.5 sm:gap-2 lg:gap-3">
+          {isAuthenticated && <NotificationsMenu variant="desktop" />}
           {isAuthenticated ? (
             <div className="hidden lg:block">
               <UserMenu variant="header" />
@@ -88,16 +85,7 @@ export function Header({ onSearch }: HeaderProps) {
             Anunciar grátis
           </button>
 
-          {isAuthenticated && (
-            <button
-              type="button"
-              onClick={() => navigate("/notificacoes")}
-              className="touch-target rounded-full p-2 text-papufy-muted hover:bg-gray-50 lg:hidden"
-              aria-label="Notificações"
-            >
-              <IconBell className="h-6 w-6" />
-            </button>
-          )}
+          {isAuthenticated && <NotificationsMenu variant="mobile" />}
         </div>
       </div>
 

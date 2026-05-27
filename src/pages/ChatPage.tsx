@@ -2,14 +2,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { SafeText } from "../components/SafeText";
+import { PaymentCheckoutSheet } from "../components/mobile/PaymentCheckoutSheet";
 import { IconChevronLeft } from "../components/icons/NavIcons";
 import { useChat } from "../context/ChatContext";
 import { api } from "../lib/api";
 import {
   CONTACT_VIOLATION_MESSAGE,
-  containsContactLeak,
+  containsRestrictedContent,
 } from "../lib/contactPolicy";
-import type { ChatMessage, ConversationSummary } from "../types";
+import type { ChatMessage, ConversationSummary, Transaction } from "../types";
 
 export function ChatPage() {
   const { id: activeId } = useParams<{ id?: string }>();
@@ -29,11 +30,29 @@ export function ChatPage() {
   const [policyWarning, setPolicyWarning] = useState<string | null>(null);
   const [loadingList, setLoadingList] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(false);
+  const [sendingProposal, setSendingProposal] = useState(false);
+  const [proposalModalOpen, setProposalModalOpen] = useState(false);
+  const [proposalValue, setProposalValue] = useState("");
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutMessage, setCheckoutMessage] = useState<ChatMessage | null>(null);
+  const [checkoutTransaction, setCheckoutTransaction] = useState<Transaction | null>(
+    null
+  );
+  const [checkoutPixPayload, setCheckoutPixPayload] = useState("");
+  const [checkoutPixImage, setCheckoutPixImage] = useState<string | null>(null);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportDescription, setReportDescription] = useState("");
+  const [reportFile, setReportFile] = useState<File | null>(null);
+  const [reportSending, setReportSending] = useState(false);
+  const [transactionsById, setTransactionsById] = useState<
+    Record<string, Transaction>
+  >({});
   const [error, setError] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const draftHasContactLeak = useMemo(
-    () => draft.trim().length > 0 && containsContactLeak(draft),
+    () => draft.trim().length > 0 && containsRestrictedContent(draft),
     [draft]
   );
 
@@ -56,6 +75,25 @@ export function ChatPage() {
       try {
         const { messages: list } = await api.chat.messages(conversationId);
         setMessages(list);
+        const txIds = Array.from(
+          new Set(
+            list
+              .map((m) => m.transactionId)
+              .filter((id): id is string => Boolean(id))
+          )
+        );
+        if (txIds.length > 0) {
+          const fetched = await Promise.all(
+            txIds.map(async (id) => {
+              const { transaction } = await api.payments.transactionStatus(id);
+              return [id, transaction] as const;
+            })
+          );
+          setTransactionsById((prev) => ({
+            ...prev,
+            ...Object.fromEntries(fetched),
+          }));
+        }
         joinConversation(conversationId);
         await refreshUnread();
       } catch (err) {
@@ -82,6 +120,14 @@ export function ChatPage() {
   }, [activeId, loadMessages]);
 
   useEffect(() => {
+    if (!activeId) return;
+    const id = window.setInterval(() => {
+      void loadMessages(activeId);
+    }, 8000);
+    return () => window.clearInterval(id);
+  }, [activeId, loadMessages]);
+
+  useEffect(() => {
     return onMessage((msg) => {
       if (!activeId || msg.conversationId !== activeId) {
         void loadConversations();
@@ -98,9 +144,34 @@ export function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  useEffect(() => {
+    if (!checkoutTransaction?.id || checkoutTransaction.status !== "PENDING") return;
+    const id = window.setInterval(async () => {
+      try {
+        const { transaction } = await api.payments.transactionStatus(
+          checkoutTransaction.id
+        );
+        setCheckoutTransaction(transaction);
+        if (transaction.status === "PAID") {
+          await loadMessages(activeId ?? "");
+          await loadConversations();
+        }
+      } catch {
+        // ignore polling errors
+      }
+    }, 5000);
+    return () => window.clearInterval(id);
+  }, [
+    checkoutTransaction?.id,
+    checkoutTransaction?.status,
+    activeId,
+    loadMessages,
+    loadConversations,
+  ]);
+
   const handleDraftChange = (value: string) => {
     setDraft(value);
-    if (value.trim() && containsContactLeak(value)) {
+    if (value.trim() && containsRestrictedContent(value)) {
       setPolicyWarning(CONTACT_VIOLATION_MESSAGE);
     } else {
       setPolicyWarning(null);
@@ -111,7 +182,7 @@ export function ChatPage() {
     e.preventDefault();
     if (!activeId || !draft.trim()) return;
 
-    if (containsContactLeak(draft)) {
+    if (containsRestrictedContent(draft)) {
       setPolicyWarning(CONTACT_VIOLATION_MESSAGE);
       return;
     }
@@ -131,7 +202,11 @@ export function ChatPage() {
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erro ao enviar.";
       setError(msg);
-      if (msg.toLowerCase().includes("telefone") || msg.toLowerCase().includes("redes sociais")) {
+      if (
+        msg.toLowerCase().includes("telefone") ||
+        msg.toLowerCase().includes("endereço") ||
+        msg.toLowerCase().includes("redes sociais")
+      ) {
         setPolicyWarning(msg);
       }
     }
@@ -139,6 +214,88 @@ export function ChatPage() {
 
   const activeConversation = conversations.find((c) => c.id === activeId);
   const showListOnMobile = !activeId;
+  const canSendProposal =
+    !!activeConversation &&
+    activeConversation.contextType === "listing" &&
+    activeConversation.myRole === "provider";
+
+  const canReportProblem = useMemo(() => {
+    if (!activeConversation || activeConversation.myRole !== "provider") return false;
+    return messages.some(
+      (m) =>
+        m.type === "PROPOSAL" &&
+        m.transactionId &&
+        (transactionsById[m.transactionId]?.status === "PAID" ||
+          checkoutTransaction?.status === "PAID")
+    );
+  }, [
+    activeConversation,
+    messages,
+    checkoutTransaction?.status,
+    transactionsById,
+  ]);
+
+  const submitProposal = async () => {
+    if (!activeId) return;
+    const value = Number(proposalValue);
+    if (!value || value <= 0) return;
+    setSendingProposal(true);
+    try {
+      const { message } = await api.chat.sendProposal(activeId, value);
+      setMessages((prev) => [...prev, message]);
+      setProposalModalOpen(false);
+      setProposalValue("");
+      await loadConversations();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao enviar proposta.");
+    } finally {
+      setSendingProposal(false);
+    }
+  };
+
+  const openCheckout = async (message: ChatMessage) => {
+    if (!message.id) return;
+    setCheckoutOpen(true);
+    setCheckoutMessage(message);
+    setCheckoutLoading(true);
+    try {
+      const result = await api.payments.checkoutFromProposal(message.id, "PIX");
+      setCheckoutTransaction(result.transaction);
+      setCheckoutPixPayload(result.pix.payload ?? "");
+      setCheckoutPixImage(result.pix.encodedImage ?? null);
+      await loadMessages(activeId ?? "");
+      await loadConversations();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao iniciar pagamento.");
+      setCheckoutOpen(false);
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
+  const submitReport = async () => {
+    if (!checkoutTransaction?.id || !reportDescription.trim()) return;
+    setReportSending(true);
+    try {
+      await api.payments.reportProblem(
+        checkoutTransaction.id,
+        reportDescription,
+        reportFile ?? undefined
+      );
+      setReportOpen(false);
+      setReportDescription("");
+      setReportFile(null);
+      await loadMessages(activeId ?? "");
+      const { transaction } = await api.payments.transactionStatus(
+        checkoutTransaction.id
+      );
+      setCheckoutTransaction(transaction);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao abrir disputa.");
+    } finally {
+      setReportSending(false);
+    }
+  };
 
   return (
     <Layout showCategories={false}>
@@ -154,7 +311,7 @@ export function ChatPage() {
               Conversas dos seus trabalhos
               {connected ? " · online" : " · reconectando..."}
               {unreadCount > 0 && (
-                <span className="ml-2 font-semibold text-papufy-orange">
+                <span className="ml-2 font-semibold text-sky-600">
                   · {unreadCount} não lida{unreadCount !== 1 ? "s" : ""}
                 </span>
               )}
@@ -182,7 +339,7 @@ export function ChatPage() {
                       {c.otherUser.nome}
                     </p>
                     {c.unread > 0 && (
-                      <span className="shrink-0 rounded-full bg-papufy-orange px-2 py-0.5 text-[10px] font-bold text-white">
+                      <span className="shrink-0 rounded-full bg-sky-500 px-2 py-0.5 text-[10px] font-bold text-white">
                         {c.unread}
                       </span>
                     )}
@@ -208,7 +365,7 @@ export function ChatPage() {
                 </p>
                 <Link
                   to="/"
-                  className="mt-4 inline-block font-semibold text-papufy-orange hover:underline"
+                  className="mt-4 inline-block font-semibold text-sky-600 hover:underline"
                 >
                   Ver trabalhos
                 </Link>
@@ -245,6 +402,24 @@ export function ChatPage() {
                     {activeConversation?.contextTitulo}
                   </p>
                 </div>
+                {canSendProposal && (
+                  <button
+                    type="button"
+                    onClick={() => setProposalModalOpen(true)}
+                    className="rounded-xl bg-sky-500 px-3 py-2 text-xs font-semibold text-white transition active:scale-95"
+                  >
+                    Enviar Proposta
+                  </button>
+                )}
+                {canReportProblem && (
+                  <button
+                    type="button"
+                    onClick={() => setReportOpen(true)}
+                    className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 transition active:scale-95"
+                  >
+                    Reportar Problema
+                  </button>
+                )}
               </div>
 
               <div className="flex-1 space-y-3 overflow-y-auto overscroll-contain p-4">
@@ -256,20 +431,59 @@ export function ChatPage() {
                     key={m.id}
                     className={`flex ${m.isMine ? "justify-end" : "justify-start"}`}
                   >
-                    <div
-                      className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm sm:max-w-[80%] ${
-                        m.isMine
-                          ? "bg-papufy-orange text-white"
-                          : "bg-gray-100 text-papufy-text"
-                      }`}
-                    >
-                      {!m.isMine && (
-                        <p className="mb-1 text-xs font-semibold opacity-70">
-                          {m.senderNome}
+                    {m.type === "PROPOSAL" ? (
+                      <div className="w-full max-w-xs rounded-2xl border border-sky-100 bg-sky-50/50 p-4 text-slate-800 shadow-sm">
+                        <p className="text-xs font-semibold text-sky-700">
+                          Proposta de valor
                         </p>
-                      )}
-                      <SafeText as="span">{m.content}</SafeText>
-                    </div>
+                        <p className="mt-1 text-2xl font-black text-sky-700">
+                          {new Intl.NumberFormat("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                            maximumFractionDigits: 2,
+                          }).format(m.proposalValue ?? 0)}
+                        </p>
+                        {!m.transactionId && activeConversation?.myRole === "contractor" && (
+                          <button
+                            type="button"
+                            onClick={() => void openCheckout(m)}
+                            className="mt-3 rounded-xl bg-sky-500 px-4 py-2 text-sm font-medium text-white transition-transform active:scale-95"
+                          >
+                            Aceitar e Pagar Seguro
+                          </button>
+                        )}
+                        {m.transactionId && (
+                          <p className="mt-2 text-xs font-semibold text-sky-700">
+                            {(m.transactionId &&
+                              transactionsById[m.transactionId]?.status === "PAID") ||
+                            checkoutTransaction?.status === "PAID"
+                              ? "Pagamento Confirmado — Serviço em Andamento"
+                              : m.transactionId &&
+                                  transactionsById[m.transactionId]?.status ===
+                                    "IN_DISPUTE"
+                                ? "Pagamento em mediação pelo suporte"
+                              : "Proposta vinculada ao pagamento"}
+                          </p>
+                        )}
+                      </div>
+                    ) : (
+                      <div
+                        className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm sm:max-w-[80%] ${
+                          m.type === "SYSTEM"
+                            ? "border border-sky-100 bg-sky-50 text-sky-700"
+                            : m.isMine
+                              ? "bg-sky-500 text-white"
+                              : "bg-gray-100 text-papufy-text"
+                        }`}
+                      >
+                        {!m.isMine && m.type !== "SYSTEM" && (
+                          <p className="mb-1 text-xs font-semibold opacity-70">
+                            {m.senderNome}
+                          </p>
+                        )}
+                        <SafeText as="span">{m.content}</SafeText>
+                      </div>
+                    )}
                   </div>
                 ))}
                 <div ref={bottomRef} />
@@ -303,7 +517,7 @@ export function ChatPage() {
                   <button
                     type="submit"
                     disabled={!draft.trim() || draftHasContactLeak}
-                    className="touch-target shrink-0 rounded-xl bg-gradient-to-r from-sky-500 to-blue-500 px-4 text-sm font-bold text-white disabled:opacity-50"
+                    className="touch-target shrink-0 rounded-xl bg-sky-500 px-4 text-sm font-bold text-white disabled:opacity-50"
                   >
                     Enviar
                   </button>
@@ -313,6 +527,109 @@ export function ChatPage() {
           )}
         </section>
       </div>
+      <PaymentCheckoutSheet
+        open={checkoutOpen}
+        onClose={() => setCheckoutOpen(false)}
+        title={checkoutLoading ? "Gerando pagamento..." : "Pagamento Seguro"}
+        amountLabel={
+          checkoutMessage?.proposalValue
+            ? new Intl.NumberFormat("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              }).format(checkoutMessage.proposalValue)
+            : "R$ 0,00"
+        }
+        pixCopyPaste={checkoutPixPayload}
+        pixQrCodeImage={checkoutPixImage}
+        statusLabel={
+          checkoutTransaction?.status === "PAID"
+            ? "Pagamento Confirmado — Serviço em Andamento"
+            : checkoutTransaction?.status === "IN_DISPUTE"
+              ? "Em mediação do suporte"
+              : undefined
+        }
+      />
+      {proposalModalOpen && (
+        <div className="fixed inset-0 z-[90] bg-black/40 p-4">
+          <div className="mx-auto mt-24 w-full max-w-sm rounded-2xl border border-sky-100 bg-white p-4 shadow-xl">
+            <h3 className="text-base font-bold text-slate-900">Enviar Proposta</h3>
+            <p className="mt-1 text-xs text-slate-500">
+              Informe o valor fixo combinado para este serviço.
+            </p>
+            <input
+              type="number"
+              min={1}
+              value={proposalValue}
+              onChange={(e) => setProposalValue(e.target.value)}
+              className="mt-3 w-full rounded-xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
+              placeholder="Ex: 180"
+            />
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setProposalModalOpen(false)}
+                className="flex-1 rounded-xl border border-slate-200 py-2 text-sm font-medium text-slate-600"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={!proposalValue || sendingProposal}
+                onClick={() => void submitProposal()}
+                className="flex-1 rounded-xl bg-sky-500 py-2 text-sm font-semibold text-white disabled:opacity-50"
+              >
+                {sendingProposal ? "Enviando..." : "Confirmar"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {reportOpen && (
+        <div className="fixed inset-0 z-[95] flex flex-col justify-end bg-black/40">
+          <div className="rounded-t-3xl border border-sky-100 bg-white p-4 pb-6 shadow-xl">
+            <div className="mx-auto mb-3 h-1 w-12 rounded-full bg-slate-200" />
+            <h3 className="text-base font-bold text-slate-900">Reportar Problema</h3>
+            <p className="mt-2 rounded-xl border border-sky-200 bg-sky-50/40 px-3 py-2 text-xs text-sky-800">
+              Para agilizar a análise do suporte, é altamente recomendado que você
+              envie uma foto do serviço concluído como prova do seu trabalho.
+            </p>
+            <textarea
+              value={reportDescription}
+              onChange={(e) => setReportDescription(e.target.value)}
+              rows={4}
+              className="mt-3 w-full rounded-xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
+              placeholder="Descreva o problema com detalhes..."
+            />
+            <label className="mt-3 block rounded-xl border border-dashed border-sky-200 bg-sky-50/30 px-3 py-4 text-center text-xs font-semibold text-sky-700">
+              {reportFile ? reportFile.name : "Anexar foto (câmera ou galeria)"}
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={(e) => setReportFile(e.target.files?.[0] ?? null)}
+              />
+            </label>
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setReportOpen(false)}
+                className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-slate-600"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={reportSending || reportDescription.trim().length < 10}
+                onClick={() => void submitReport()}
+                className="flex-1 rounded-xl bg-sky-500 py-2.5 text-sm font-semibold text-white disabled:opacity-50"
+              >
+                {reportSending ? "Enviando..." : "Enviar para o Suporte"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }

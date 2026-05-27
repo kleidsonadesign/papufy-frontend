@@ -104,7 +104,7 @@ export function ListingDetailPage() {
   return (
     <MobileShell>
       <article className="mobile-gutter space-y-4 py-3 pb-28">
-        <div className="relative aspect-square overflow-hidden rounded-2xl bg-slate-100">
+        <div className="relative mx-auto aspect-[16/10] max-h-52 w-full max-w-md overflow-hidden rounded-2xl bg-slate-100">
           {showImage ? (
             <img
               src={cover!}
