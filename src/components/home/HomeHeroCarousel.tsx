@@ -185,7 +185,7 @@ export function HomeHeroCarousel() {
           <IconChevron direction="left" />
         </button>
 
-        <div className="relative min-w-0 flex-1 overflow-hidden rounded-2xl">
+        <div className="min-w-0 flex-1 overflow-hidden rounded-2xl">
           <div
             className="flex transition-transform duration-500 ease-out"
             style={{ transform: `translateX(-${index * 100}%)` }}
@@ -200,43 +200,6 @@ export function HomeHeroCarousel() {
               </div>
             ))}
           </div>
-
-          <div className="pointer-events-none absolute inset-x-0 bottom-1.5 z-10 flex items-center justify-center gap-2 sm:hidden">
-            <button
-              type="button"
-              onClick={prev}
-              className={`${navBtnClass} pointer-events-auto`}
-              aria-label="Banner anterior"
-            >
-              <IconChevron direction="left" />
-            </button>
-
-            <div className="pointer-events-auto flex items-center gap-1.5 rounded-full bg-white/90 px-2 py-1 shadow-sm backdrop-blur-sm">
-              {HERO_SLIDES.map((slide, i) => (
-                <button
-                  key={slide.id}
-                  type="button"
-                  onClick={() => goTo(i)}
-                  aria-label={`Ir para banner ${i + 1}`}
-                  aria-current={i === index ? "true" : undefined}
-                  className={`rounded-full transition-all ${
-                    i === index
-                      ? "h-2 w-5 bg-sky-500"
-                      : "h-2 w-2 bg-slate-300"
-                  }`}
-                />
-              ))}
-            </div>
-
-            <button
-              type="button"
-              onClick={next}
-              className={`${navBtnClass} pointer-events-auto`}
-              aria-label="Próximo banner"
-            >
-              <IconChevron direction="right" />
-            </button>
-          </div>
         </div>
 
         <button
@@ -249,6 +212,42 @@ export function HomeHeroCarousel() {
         </button>
       </div>
 
+      <div className="mt-1.5 flex items-center justify-center gap-2 sm:hidden">
+        <button
+          type="button"
+          onClick={prev}
+          className={navBtnClass}
+          aria-label="Banner anterior"
+        >
+          <IconChevron direction="left" />
+        </button>
+
+        <div className="flex items-center gap-1.5">
+          {HERO_SLIDES.map((slide, i) => (
+            <button
+              key={slide.id}
+              type="button"
+              onClick={() => goTo(i)}
+              aria-label={`Ir para banner ${i + 1}`}
+              aria-current={i === index ? "true" : undefined}
+              className={`rounded-full transition-all ${
+                i === index
+                  ? "h-2 w-5 bg-sky-500"
+                  : "h-2 w-2 bg-slate-300"
+              }`}
+            />
+          ))}
+        </div>
+
+        <button
+          type="button"
+          onClick={next}
+          className={navBtnClass}
+          aria-label="Próximo banner"
+        >
+          <IconChevron direction="right" />
+        </button>
+      </div>
     </section>
   );
 }
