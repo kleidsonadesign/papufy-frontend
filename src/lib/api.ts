@@ -336,6 +336,8 @@ export const api = {
           ConversationSummary & {
             jobTitulo?: string;
             jobCategoria?: string;
+            /** @deprecated resposta legada da API */
+            listingTipo?: string;
           }
         >;
         unreadTotal: number;
