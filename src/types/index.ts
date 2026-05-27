@@ -147,8 +147,9 @@ export interface ChatMessage {
   id: string;
   conversationId: string;
   content: string;
-  type?: "TEXT" | "PROPOSAL" | "SYSTEM";
+  type?: "TEXT" | "PROPOSAL" | "SYSTEM" | "IMAGE";
   proposalValue?: number | null;
+  imageUrl?: string | null;
   transactionId?: string | null;
   senderId: string;
   senderNome: string;

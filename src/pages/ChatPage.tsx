@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { SafeText } from "../components/SafeText";
 import { PaymentCheckoutSheet } from "../components/mobile/PaymentCheckoutSheet";
-import { IconChevronLeft } from "../components/icons/NavIcons";
+import { IconChevronLeft, IconPaperclip } from "../components/icons/NavIcons";
 import { useAuth } from "../context/AuthContext";
 import { useChat } from "../context/ChatContext";
 import { api } from "../lib/api";
@@ -31,6 +31,8 @@ export function ChatPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [policyWarning, setPolicyWarning] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const loadingList = conversationsLoading && conversations.length === 0;
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sendingProposal, setSendingProposal] = useState(false);
@@ -145,10 +147,11 @@ export function ChatPage() {
       }
       setMessages((prev) => {
         if (prev.some((m) => m.id === msg.id)) return prev;
-        return [...prev, msg];
+        const isMine = user?.id ? msg.senderId === user.id : msg.isMine;
+        return [...prev, { ...msg, isMine }];
       });
     });
-  }, [activeId, onMessage, loadConversations]);
+  }, [activeId, onMessage, loadConversations, user?.id]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -185,6 +188,35 @@ export function ChatPage() {
       setPolicyWarning(CONTACT_VIOLATION_MESSAGE);
     } else {
       setPolicyWarning(null);
+    }
+  };
+
+  const handleImagePick = async (file: File | undefined) => {
+    if (!activeId || !file) return;
+    const allowed = ["image/jpeg", "image/png"];
+    if (!allowed.includes(file.type)) {
+      setError("Use imagens JPEG ou PNG (até 5 MB).");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setError("A imagem deve ter no máximo 5 MB.");
+      return;
+    }
+
+    setUploadingImage(true);
+    setError(null);
+    try {
+      const { message } = await api.chat.sendImage(activeId, file);
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === message.id)) return prev;
+        return [...prev, message];
+      });
+      void loadConversations();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao enviar imagem.");
+    } finally {
+      setUploadingImage(false);
+      if (imageInputRef.current) imageInputRef.current.value = "";
     }
   };
 
@@ -596,6 +628,31 @@ export function ChatPage() {
                           </>
                         )}
                       </div>
+                    ) : m.type === "IMAGE" && m.imageUrl ? (
+                      <div
+                        className={`max-w-[85%] overflow-hidden rounded-2xl sm:max-w-[80%] ${
+                          m.isMine ? "bg-sky-500 p-1" : "bg-gray-100 p-1"
+                        }`}
+                      >
+                        {!m.isMine && (
+                          <p className="px-2 pb-1 pt-1 text-xs font-semibold text-papufy-text">
+                            {m.senderNome}
+                          </p>
+                        )}
+                        <a
+                          href={m.imageUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block"
+                        >
+                          <img
+                            src={m.imageUrl}
+                            alt="Imagem enviada no chat"
+                            className="max-h-64 w-full rounded-xl object-cover"
+                            loading="lazy"
+                          />
+                        </a>
+                      </div>
                     ) : (
                       <div
                         className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm sm:max-w-[80%] ${
@@ -632,12 +689,35 @@ export function ChatPage() {
                 onSubmit={handleSend}
                 className="flex flex-col gap-2 border-t border-papufy-border p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4"
               >
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    ref={imageInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png"
+                    className="hidden"
+                    disabled={uploadingImage}
+                    onChange={(e) => void handleImagePick(e.target.files?.[0])}
+                  />
+                  <button
+                    type="button"
+                    disabled={uploadingImage}
+                    onClick={() => imageInputRef.current?.click()}
+                    className="touch-target flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-sky-200 text-sky-600 transition hover:bg-sky-50 disabled:opacity-50"
+                    aria-label="Enviar imagem"
+                    title="Enviar imagem"
+                  >
+                    {uploadingImage ? (
+                      <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-sky-200 border-t-sky-600" />
+                    ) : (
+                      <IconPaperclip className="h-5 w-5" />
+                    )}
+                  </button>
                   <input
                     value={draft}
                     onChange={(e) => handleDraftChange(e.target.value)}
                     placeholder="Digite sua mensagem..."
                     aria-invalid={draftHasContactLeak}
+                    disabled={uploadingImage}
                     className={`input-field min-h-11 flex-1 rounded-xl border py-3 text-base outline-none sm:text-sm ${
                       draftHasContactLeak
                         ? "border-amber-400 focus:border-amber-500 focus:ring-amber-200"
@@ -646,7 +726,7 @@ export function ChatPage() {
                   />
                   <button
                     type="submit"
-                    disabled={!draft.trim() || draftHasContactLeak}
+                    disabled={!draft.trim() || draftHasContactLeak || uploadingImage}
                     className="touch-target shrink-0 rounded-xl bg-sky-500 px-4 text-sm font-bold text-white disabled:opacity-50"
                   >
                     Enviar

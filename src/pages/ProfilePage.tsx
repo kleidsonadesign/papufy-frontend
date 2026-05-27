@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { UploadZone } from "../components/mobile/UploadZone";
 import { IconUser } from "../components/icons/NavIcons";
@@ -151,6 +152,19 @@ export function ProfilePage() {
             {user?.email} · Currículo e certificados pelo celular
           </p>
         </div>
+
+        <section className="rounded-2xl border border-sky-100 bg-gradient-to-r from-sky-50 to-blue-50 p-4 shadow-sm sm:p-5">
+          <h2 className="font-bold text-papufy-text">Carteira e saque</h2>
+          <p className="mt-1 text-sm text-papufy-muted">
+            Consulte o saldo da sua subconta Asaas e solicite transferência Pix.
+          </p>
+          <Link
+            to="/carteira"
+            className="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-sky-400 to-blue-500 px-4 py-3 text-sm font-bold text-white shadow-md transition hover:from-sky-500 hover:to-blue-600 sm:w-auto"
+          >
+            Abrir carteira e sacar
+          </Link>
+        </section>
 
         <section className="space-y-4 rounded-2xl border border-papufy-border bg-white p-4 shadow-sm sm:p-6">
           <h2 className="font-bold text-papufy-text">Foto de perfil</h2>

@@ -41,6 +41,11 @@ const MyJobsPage = lazy(() =>
 const ProfilePage = lazy(() =>
   import("./pages/ProfilePage").then((m) => ({ default: m.ProfilePage }))
 );
+const ProfileWalletPage = lazy(() =>
+  import("./pages/ProfileWalletPage").then((m) => ({
+    default: m.ProfileWalletPage,
+  }))
+);
 const WalletPage = lazy(() =>
   import("./pages/WalletPage").then((m) => ({ default: m.WalletPage }))
 );
@@ -115,6 +120,14 @@ export default function App() {
                       element={
                         <ProtectedRoute>
                           <ProfilePage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/perfil/carteira"
+                      element={
+                        <ProtectedRoute>
+                          <ProfileWalletPage />
                         </ProtectedRoute>
                       }
                     />

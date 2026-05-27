@@ -55,7 +55,7 @@ function statusLabel(status: TransactionStatus, userId: string, tx: WalletTransa
     PENDING: asPro ? "Aguardando pagamento do cliente" : "Aguardando seu pagamento",
     PAID: asPro ? "Pago — confirme a conclusão do serviço" : "Pagamento confirmado",
     IN_DISPUTE: "Em mediação do suporte",
-    RELEASED: asPro ? "Liberado para saque" : "Serviço em andamento / liberado",
+    RELEASED: asPro ? "Liberado no Papufy" : "Serviço em andamento / liberado",
     WITHDRAWN: asPro ? "Sacado via Pix" : "Concluído",
     FAILED: "Falhou",
     CANCELED: "Cancelado",
@@ -72,22 +72,39 @@ export function WalletPage() {
   const { showToast } = useToast();
   const [transactions, setTransactions] = useState<WalletTransaction[]>([]);
   const [summary, setSummary] = useState<WalletSummary | null>(null);
+  const [asaasBalance, setAsaasBalance] = useState<number | null>(null);
+  const [asaasWalletId, setAsaasWalletId] = useState<string | null>(null);
+  const [papufyWithdrawable, setPapufyWithdrawable] = useState(0);
+  const [maxWithdraw, setMaxWithdraw] = useState(0);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<WalletTab>("pending");
-  const [withdrawTxId, setWithdrawTxId] = useState<string | null>(null);
-  const [pixKey, setPixKey] = useState("");
+  const [withdrawValue, setWithdrawValue] = useState("");
+  const [pixAddressKey, setPixAddressKey] = useState("");
   const [withdrawing, setWithdrawing] = useState(false);
+  const [showWithdrawForm, setShowWithdrawForm] = useState(false);
 
   const loadWallet = useCallback(async () => {
     if (!user?.id) return;
     setLoading(true);
     try {
-      const [listData, summaryData] = await Promise.all([
+      const [listData, summaryData, balanceData] = await Promise.all([
         api.payments.listMine(),
         api.payments.wallet(),
+        api.payments.balance().catch(() => null),
       ]);
       setTransactions(listData.transactions);
       setSummary(summaryData);
+      if (balanceData) {
+        setAsaasBalance(balanceData.balance);
+        setAsaasWalletId(balanceData.walletId);
+        setPapufyWithdrawable(balanceData.papufyWithdrawable);
+        setMaxWithdraw(balanceData.maxWithdraw);
+      } else {
+        setAsaasBalance(null);
+        setAsaasWalletId(null);
+        setPapufyWithdrawable(0);
+        setMaxWithdraw(0);
+      }
     } catch (err) {
       showToast(
         err instanceof Error ? err.message : "Não foi possível carregar a carteira.",
@@ -102,6 +119,13 @@ export function WalletPage() {
     void loadWallet();
   }, [loadWallet]);
 
+  useEffect(() => {
+    if (user?.telefone && !pixAddressKey) {
+      const digits = user.telefone.replace(/\D/g, "");
+      if (digits.length >= 10) setPixAddressKey(digits);
+    }
+  }, [user?.telefone, pixAddressKey]);
+
   const filtered = useMemo(() => {
     if (!user?.id) return [];
     return transactions.filter((tx) =>
@@ -111,18 +135,38 @@ export function WalletPage() {
     );
   }, [transactions, tab, user?.id]);
 
-  const handleWithdraw = async () => {
-    if (!withdrawTxId || !pixKey.trim()) return;
+  const handleSubaccountWithdraw = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const amount = Number(withdrawValue.replace(",", "."));
+    if (!Number.isFinite(amount) || amount < 1) {
+      showToast("Informe um valor válido (mínimo R$ 1,00).", "error");
+      return;
+    }
+    if (amount > maxWithdraw + 0.009) {
+      showToast(
+        `Valor acima do permitido (${formatPrice(maxWithdraw, false)}).`,
+        "error"
+      );
+      return;
+    }
+    if (!pixAddressKey.trim()) {
+      showToast("Informe sua chave Pix de destino.", "error");
+      return;
+    }
+
     setWithdrawing(true);
     try {
-      await api.payments.withdraw(withdrawTxId, pixKey.trim());
+      await api.payments.withdrawSubaccount({
+        value: amount,
+        pixAddressKey: pixAddressKey.trim(),
+      });
       showToast("Saque Pix solicitado com sucesso!", "success");
-      setWithdrawTxId(null);
-      setPixKey("");
+      setWithdrawValue("");
+      setShowWithdrawForm(false);
       await loadWallet();
     } catch (err) {
       showToast(
-        err instanceof Error ? err.message : "Erro ao sacar via Pix.",
+        err instanceof Error ? err.message : "Não foi possível solicitar o saque.",
         "error"
       );
     } finally {
@@ -134,24 +178,68 @@ export function WalletPage() {
     return <Navigate to="/login" replace />;
   }
 
+  const balanceUnavailable = asaasBalance === null && !loading;
+  const canWithdraw = !loading && !balanceUnavailable && maxWithdraw >= 1;
+
   return (
     <MobileShell>
       <div className="mx-auto w-full max-w-3xl space-y-4 p-4 pb-8">
         <header>
           <h1 className="text-xl font-bold text-slate-900">Carteira</h1>
           <p className="mt-1 text-sm text-slate-500">
-            Saldo, pagamentos pendentes e confirmados
+            Saldo na subconta Asaas, saque Pix e histórico de pagamentos
           </p>
         </header>
 
         <section className="rounded-2xl border border-sky-100 bg-gradient-to-br from-sky-50 to-blue-50 p-5 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-wide text-sky-700">
-            Saldo disponível para saque
+            Saldo disponível (subconta Asaas)
           </p>
-          <p className="mt-1 text-3xl font-black text-sky-700">
-            {formatPrice(summary?.availableBalance ?? 0, false)}
+          {loading ? (
+            <div className="mt-3 flex items-center gap-2 text-sm text-sky-600">
+              <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-sky-200 border-t-sky-600" />
+              Consultando saldo…
+            </div>
+          ) : balanceUnavailable ? (
+            <p className="mt-2 text-sm text-sky-800">
+              Não foi possível consultar a subconta. Verifique CPF e telefone no perfil e
+              tente novamente.
+            </p>
+          ) : (
+            <p className="mt-1 text-3xl font-black text-sky-700">
+              {formatPrice(asaasBalance ?? 0, false)}
+            </p>
+          )}
+          {asaasWalletId && (
+            <p className="mt-2 truncate text-[10px] text-sky-600/80">
+              Subconta: {asaasWalletId}
+            </p>
+          )}
+
+          <p className="mt-4 rounded-xl border border-sky-100 bg-white/80 px-3 py-2.5 text-xs leading-relaxed text-slate-600">
+            O <strong className="text-sky-800">saldo Asaas</strong> é o dinheiro já
+            creditado na sua subconta (após o cliente pagar). O{" "}
+            <strong className="text-sky-800">liberado no Papufy</strong> só aumenta
+            quando você e o cliente confirmam a conclusão do serviço. O saque usa o
+            menor dos dois valores.
           </p>
+
+          {!loading && !balanceUnavailable && (
+            <p className="mt-3 text-sm font-semibold text-sky-800">
+              Máximo para sacar agora: {formatPrice(maxWithdraw, false)}
+            </p>
+          )}
+
           <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
+            <div className="rounded-xl bg-white/70 px-3 py-2">
+              <p className="text-slate-500">Liberado no Papufy</p>
+              <p className="font-semibold text-slate-800">
+                {formatPrice(
+                  balanceUnavailable ? summary?.availableBalance ?? 0 : papufyWithdrawable,
+                  false
+                )}
+              </p>
+            </div>
             <div className="rounded-xl bg-white/70 px-3 py-2">
               <p className="text-slate-500">A receber (pendente)</p>
               <p className="font-semibold text-slate-800">
@@ -165,15 +253,80 @@ export function WalletPage() {
               </p>
             </div>
             {(summary?.pendingPay ?? 0) > 0 && (
-              <div className="col-span-2 rounded-xl bg-white/70 px-3 py-2">
-                <p className="text-slate-500">Você deve pagar (pendente)</p>
+              <div className="rounded-xl bg-white/70 px-3 py-2">
+                <p className="text-slate-500">Você deve pagar</p>
                 <p className="font-semibold text-slate-800">
                   {formatPrice(summary?.pendingPay ?? 0, false)}
                 </p>
               </div>
             )}
           </div>
+
+          <button
+            type="button"
+            disabled={loading || balanceUnavailable}
+            onClick={() => setShowWithdrawForm((v) => !v)}
+            className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-400 to-blue-500 text-sm font-bold text-white shadow-md transition hover:from-sky-500 hover:to-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {showWithdrawForm ? "Fechar formulário de saque" : "Solicitar saque via Pix"}
+          </button>
         </section>
+
+        {showWithdrawForm && (
+          <form
+            onSubmit={handleSubaccountWithdraw}
+            className="space-y-3 rounded-2xl border border-sky-100 bg-white p-4 shadow-sm"
+          >
+            <h2 className="text-sm font-bold text-slate-900">Saque da subconta</h2>
+            <p className="text-xs text-slate-500">
+              Chave Pix do mesmo CPF da subconta. Limite:{" "}
+              {formatPrice(maxWithdraw, false)}.
+            </p>
+            <div>
+              <label htmlFor="wallet-withdraw-value" className="text-xs font-medium text-slate-700">
+                Valor (R$)
+              </label>
+              <input
+                id="wallet-withdraw-value"
+                type="text"
+                inputMode="decimal"
+                placeholder="0,00"
+                value={withdrawValue}
+                onChange={(e) => setWithdrawValue(e.target.value)}
+                disabled={withdrawing}
+                className="mt-1 w-full rounded-xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-200"
+              />
+            </div>
+            <div>
+              <label htmlFor="wallet-withdraw-pix" className="text-xs font-medium text-slate-700">
+                Chave Pix de destino
+              </label>
+              <input
+                id="wallet-withdraw-pix"
+                type="text"
+                placeholder="CPF, e-mail, telefone ou aleatória"
+                value={pixAddressKey}
+                onChange={(e) => setPixAddressKey(e.target.value)}
+                disabled={withdrawing}
+                className="mt-1 w-full rounded-xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400 focus:ring-2 focus:ring-sky-200"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={withdrawing}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-400 to-blue-500 py-3 text-sm font-bold text-white disabled:opacity-60"
+            >
+              {withdrawing ? (
+                <>
+                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                  Processando…
+                </>
+              ) : (
+                "Confirmar saque"
+              )}
+            </button>
+          </form>
+        )}
 
         <div className="flex gap-2 rounded-xl bg-slate-100 p-1">
           <button
@@ -203,7 +356,7 @@ export function WalletPage() {
         {loading ? (
           <div className="flex items-center justify-center gap-2 py-12 text-sm text-sky-600">
             <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-sky-200 border-t-sky-600" />
-            Carregando carteira...
+            Carregando lançamentos…
           </div>
         ) : filtered.length === 0 ? (
           <p className="rounded-xl border border-slate-200 bg-white px-4 py-8 text-center text-sm text-slate-500">
@@ -213,7 +366,6 @@ export function WalletPage() {
           <ul className="space-y-3">
             {filtered.map((tx) => {
               const isPro = tx.professionalId === user.id;
-              const canWithdraw = isPro && tx.status === "RELEASED";
               return (
                 <li
                   key={tx.id}
@@ -244,18 +396,6 @@ export function WalletPage() {
                       })}
                     </p>
                   )}
-                  {canWithdraw && (
-                    <button
-                      type="button"
-                      className="mt-3 flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-sky-600 text-sm font-semibold text-white active:scale-[0.98] disabled:opacity-60"
-                      onClick={() => {
-                        setWithdrawTxId(tx.id);
-                        setPixKey(user.telefone?.replace(/\D/g, "") ?? "");
-                      }}
-                    >
-                      Sacar via Pix
-                    </button>
-                  )}
                   {isPro && tx.status === "WITHDRAWN" && tx.withdrawPixKey && (
                     <p className="mt-2 text-[10px] text-slate-400">
                       Chave Pix: {tx.withdrawPixKey}
@@ -267,57 +407,6 @@ export function WalletPage() {
           </ul>
         )}
       </div>
-
-      {withdrawTxId && (
-        <div className="fixed inset-0 z-[100] flex items-end justify-center bg-slate-900/50 p-4 sm:items-center">
-          <div
-            className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="withdraw-title"
-          >
-            <h2 id="withdraw-title" className="text-lg font-bold text-slate-900">
-              Sacar via Pix
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Informe sua chave Pix (CPF, e-mail, telefone ou aleatória). O saque é
-              processado pelo Asaas.
-            </p>
-            <input
-              type="text"
-              value={pixKey}
-              onChange={(e) => setPixKey(e.target.value)}
-              placeholder="Sua chave Pix"
-              disabled={withdrawing}
-              className="mt-4 w-full rounded-xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400 disabled:bg-slate-50"
-            />
-            <div className="mt-4 flex gap-2">
-              <button
-                type="button"
-                disabled={withdrawing}
-                className="flex-1 rounded-xl border border-slate-200 py-2.5 text-sm font-medium text-slate-600 disabled:opacity-50"
-                onClick={() => {
-                  setWithdrawTxId(null);
-                  setPixKey("");
-                }}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                disabled={withdrawing || !pixKey.trim()}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-sky-600 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
-                onClick={() => void handleWithdraw()}
-              >
-                {withdrawing ? (
-                  <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-                ) : null}
-                {withdrawing ? "Sacando..." : "Confirmar saque"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </MobileShell>
   );
 }

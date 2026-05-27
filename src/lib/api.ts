@@ -377,6 +377,15 @@ export const api = {
         { method: "POST", body: JSON.stringify({ content }) }
       ),
 
+    sendImage: (conversationId: string, file: File) => {
+      const fd = new FormData();
+      fd.append("imagem", file);
+      return uploadRequest<{ message: ChatMessage }>(
+        `/chat/conversations/${conversationId}/messages/image`,
+        fd
+      );
+    },
+
     sendProposal: (
       conversationId: string,
       value: number,
@@ -458,6 +467,27 @@ export const api = {
         totalWithdrawn: number;
       }>("/payments/wallet"),
 
+    balance: () =>
+      request<{
+        balance: number;
+        walletId: string;
+        papufyWithdrawable: number;
+        maxWithdraw: number;
+      }>("/payments/balance"),
+
+    withdrawSubaccount: (payload: { value: number; pixAddressKey: string }) =>
+      request<{
+        transferId: string;
+        value: number;
+        walletId: string;
+        status: string;
+        markedTransactionIds: string[];
+        papufyWithdrawableBefore: number;
+      }>("/payments/withdraw", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      }),
+
     listMine: () =>
       request<{
         transactions: Array<
@@ -473,12 +503,6 @@ export const api = {
       request<{ transaction: Transaction }>(
         `/payments/transactions/${transactionId}/confirm-completion`,
         { method: "POST" }
-      ),
-
-    withdraw: (transactionId: string, pixKey: string) =>
-      request<{ transaction: Transaction; transferId: string }>(
-        `/payments/transactions/${transactionId}/withdraw`,
-        { method: "POST", body: JSON.stringify({ pixKey }) }
       ),
   },
 };
