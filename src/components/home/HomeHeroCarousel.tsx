@@ -51,7 +51,7 @@ function HeroBannerImage({
       alt={slide.alt}
       width={HERO_BANNER_WIDTH}
       height={HERO_BANNER_HEIGHT}
-      className="h-full w-full origin-center object-contain object-center max-sm:scale-[1.50] sm:scale-100 sm:object-cover"
+      className="h-full w-full object-contain object-center sm:object-cover"
       loading={priority ? "eager" : "lazy"}
       fetchPriority={priority ? "high" : "auto"}
       decoding="async"
@@ -212,41 +212,19 @@ export function HomeHeroCarousel() {
         </button>
       </div>
 
-      <div className="mt-1.5 flex items-center justify-center gap-2 sm:hidden">
-        <button
-          type="button"
-          onClick={prev}
-          className={navBtnClass}
-          aria-label="Banner anterior"
-        >
-          <IconChevron direction="left" />
-        </button>
-
-        <div className="flex items-center gap-1.5">
-          {HERO_SLIDES.map((slide, i) => (
-            <button
-              key={slide.id}
-              type="button"
-              onClick={() => goTo(i)}
-              aria-label={`Ir para banner ${i + 1}`}
-              aria-current={i === index ? "true" : undefined}
-              className={`rounded-full transition-all ${
-                i === index
-                  ? "h-2 w-5 bg-sky-500"
-                  : "h-2 w-2 bg-slate-300"
-              }`}
-            />
-          ))}
-        </div>
-
-        <button
-          type="button"
-          onClick={next}
-          className={navBtnClass}
-          aria-label="Próximo banner"
-        >
-          <IconChevron direction="right" />
-        </button>
+      <div className="mt-3 hidden items-center justify-center gap-1.5 sm:flex">
+        {HERO_SLIDES.map((slide, i) => (
+          <button
+            key={slide.id}
+            type="button"
+            onClick={() => goTo(i)}
+            aria-label={`Ir para banner ${i + 1}`}
+            aria-current={i === index ? "true" : undefined}
+            className={`rounded-full transition-all ${
+              i === index ? "h-2 w-5 bg-sky-500" : "h-2 w-2 bg-slate-300"
+            }`}
+          />
+        ))}
       </div>
     </section>
   );
