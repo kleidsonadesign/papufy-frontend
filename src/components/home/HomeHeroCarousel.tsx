@@ -51,7 +51,7 @@ function HeroBannerImage({
       alt={slide.alt}
       width={HERO_BANNER_WIDTH}
       height={HERO_BANNER_HEIGHT}
-      className="h-full w-full object-contain object-center"
+      className="h-full w-full origin-center object-contain object-center max-sm:scale-[2] sm:scale-100"
       loading={priority ? "eager" : "lazy"}
       fetchPriority={priority ? "high" : "auto"}
       decoding="async"
