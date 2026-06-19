@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ListingImageGallery } from "../components/ListingImageGallery";
-import { ReputationBlock } from "../components/ReputationBlock";
+import { ListingSellerCard } from "../components/ListingSellerCard";
 import { SafeText } from "../components/SafeText";
 import { MobileShell } from "../components/mobile/MobileShell";
 import { StatusBadge } from "../components/StatusBadge";
@@ -395,14 +395,6 @@ export function ListingDetailPage() {
                   </p>
                 </div>
 
-                {listing.criador?.reputation && (
-                  <ReputationBlock
-                    reputation={listing.criador.reputation}
-                    subjectLabel={listing.criador.nome.split(" ")[0] ?? "esta pessoa"}
-                    compact
-                  />
-                )}
-
                 <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:p-5">
                   <h2 className="font-bold text-slate-900">Descrição</h2>
                   <SafeText
@@ -420,9 +412,6 @@ export function ListingDetailPage() {
             <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
               <p className="text-3xl font-extrabold text-slate-900">
                 {formatPrice(listing.preco ?? null, listing.aCombinar)}
-              </p>
-              <p className="mt-1 text-xs text-slate-500">
-                Taxa Papufy de 7% apenas em pagamentos pelo app
               </p>
 
               {!isOwner && (
@@ -448,19 +437,14 @@ export function ListingDetailPage() {
             </div>
 
             {listing.criador && (
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  Anunciante
-                </p>
-                <p className="mt-2 text-lg font-bold text-slate-900">
-                  {listing.criador.nome}
-                </p>
-                {listing.criador.cidade && listing.criador.uf && (
-                  <p className="mt-1 text-sm text-slate-500">
-                    {listing.criador.cidade}, {listing.criador.uf}
-                  </p>
+              <ListingSellerCard
+                publisher={listing.criador}
+                locationLabel={formatLocation(
+                  listing.cidade,
+                  listing.uf,
+                  listing.bairro
                 )}
-              </div>
+              />
             )}
 
             {isOwner && (

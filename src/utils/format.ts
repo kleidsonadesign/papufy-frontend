@@ -1,19 +1,15 @@
 export function formatPrice(preco: number | null, aCombinar: boolean): string {
-  if (preco == null) {
-    return "Preço não informado";
-  }
-  if (aCombinar) {
+  if (preco != null) {
     return new Intl.NumberFormat("pt-BR", {
       style: "currency",
       currency: "BRL",
       maximumFractionDigits: 0,
     }).format(preco);
   }
-  return new Intl.NumberFormat("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-    maximumFractionDigits: 0,
-  }).format(preco);
+  if (aCombinar) {
+    return "A combinar";
+  }
+  return "Preço não informado";
 }
 
 export function formatLocation(cidade: string, uf: string, bairro?: string | null): string {
@@ -37,4 +33,18 @@ export function formatRelativeTime(dateIso: string): string {
   if (diffDays < 7) return `Há ${diffDays} dia${diffDays > 1 ? "s" : ""}`;
 
   return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+}
+
+export function formatMemberSince(dateIso: string): string {
+  const date = new Date(dateIso);
+  const month = date.toLocaleDateString("pt-BR", { month: "long" });
+  const year = date.getFullYear();
+  return `No Papufy desde ${month} de ${year}`;
+}
+
+export function formatLastAccess(dateIso?: string | null): string {
+  if (!dateIso) return "Último acesso não disponível";
+  const relative = formatRelativeTime(dateIso);
+  if (relative === "Agora") return "Último acesso agora";
+  return `Último acesso ${relative.charAt(0).toLowerCase()}${relative.slice(1)}`;
 }

@@ -8,6 +8,7 @@ import type {
   Job,
   JobInterestItem,
   Listing,
+  ListingPublisher,
   ListingsPage,
   SupportTicket,
   Transaction,
@@ -282,6 +283,17 @@ export const api = {
   },
 
   user: {
+    getPublicProfile: (userId: string) =>
+      request<{
+        user: ListingPublisher;
+        reputation: UserReputation;
+        listings: Listing[];
+        totalListings: number;
+      }>(`/user/${userId}/public`).then((data) => ({
+        ...data,
+        listings: data.listings.map(normalizeListing),
+      })),
+
     uploadCurriculo: (file: File, onProgress?: (pct: number) => void) => {
       const fd = new FormData();
       fd.append("curriculo", file);

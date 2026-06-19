@@ -39,6 +39,10 @@ function GalleryTile({
   );
 }
 
+function GalleryPlaceholder({ className }: { className?: string }) {
+  return <div className={`bg-slate-100 ${className ?? ""}`} aria-hidden />;
+}
+
 export function ListingImageGallery({
   titulo,
   categoria,
@@ -61,114 +65,70 @@ export function ListingImageGallery({
 
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
-  if (slides.length === 0) {
-    return (
-      <div
-        className={`flex aspect-[4/3] w-full items-center justify-center bg-gradient-to-br ${meta.imageGradient}`}
-      >
-        <span className="text-6xl sm:text-7xl">{meta.icon}</span>
-      </div>
-    );
-  }
-
   const openLightbox = (index: number) => setLightboxIndex(index);
   const closeLightbox = () => setLightboxIndex(null);
 
   const mosaicHeight =
     "h-[min(72vw,280px)] sm:h-[min(52vw,380px)] lg:h-[min(40vw,440px)]";
 
-  const renderMosaic = () => {
-    if (slides.length === 1) {
-      return (
-        <GalleryTile
-          src={slides[0]}
-          alt={titulo}
-          className="aspect-[4/3] w-full"
-          onClick={() => openLightbox(0)}
-        />
-      );
-    }
+  const extraCount = slides.length > 4 ? slides.length - 4 : 0;
 
-    if (slides.length === 2) {
-      return (
-        <div className={`grid grid-cols-2 gap-1 ${mosaicHeight}`}>
-          {slides.map((src, index) => (
-            <GalleryTile
-              key={`${src}-${index}`}
-              src={src}
-              alt={`${titulo} — foto ${index + 1}`}
-              className="h-full min-h-0"
-              onClick={() => openLightbox(index)}
-            />
-          ))}
-        </div>
-      );
+  const renderSlot = (
+    index: number,
+    className: string,
+    overlay?: string
+  ) => {
+    const src = slides[index];
+    if (!src) {
+      return <GalleryPlaceholder className={className} />;
     }
-
-    if (slides.length === 3) {
-      return (
-        <div className={`grid grid-cols-3 grid-rows-2 gap-1 ${mosaicHeight}`}>
-          <GalleryTile
-            src={slides[0]}
-            alt={`${titulo} — foto 1`}
-            className="col-span-1 row-span-2 h-full min-h-0"
-            onClick={() => openLightbox(0)}
-          />
-          <GalleryTile
-            src={slides[1]}
-            alt={`${titulo} — foto 2`}
-            className="col-span-1 row-span-2 h-full min-h-0"
-            onClick={() => openLightbox(1)}
-          />
-          <GalleryTile
-            src={slides[2]}
-            alt={`${titulo} — foto 3`}
-            className="col-span-1 row-span-2 h-full min-h-0"
-            onClick={() => openLightbox(2)}
-          />
-        </div>
-      );
-    }
-
-    const extraCount = slides.length > 4 ? slides.length - 4 : 0;
 
     return (
-      <div className={`grid grid-cols-3 grid-rows-2 gap-1 ${mosaicHeight}`}>
-        <GalleryTile
-          src={slides[0]}
-          alt={`${titulo} — foto 1`}
-          className="col-span-1 row-span-2 h-full min-h-0"
-          onClick={() => openLightbox(0)}
-        />
-        <GalleryTile
-          src={slides[1]}
-          alt={`${titulo} — foto 2`}
-          className="col-span-1 row-span-2 h-full min-h-0"
-          onClick={() => openLightbox(1)}
-        />
-        <GalleryTile
-          src={slides[2]}
-          alt={`${titulo} — foto 3`}
-          className="col-span-1 row-span-1 h-full min-h-0"
-          onClick={() => openLightbox(2)}
-        />
-        <GalleryTile
-          src={slides[3] ?? slides[2]}
-          alt={`${titulo} — foto 4`}
-          className="col-span-1 row-span-1 h-full min-h-0"
-          overlay={extraCount > 0 ? `+${extraCount}` : undefined}
-          onClick={() => openLightbox(3)}
-        />
-      </div>
+      <GalleryTile
+        src={src}
+        alt={`${titulo} — foto ${index + 1}`}
+        className={className}
+        overlay={overlay}
+        onClick={() => openLightbox(index)}
+      />
     );
   };
+
+  const renderMosaic = () => (
+    <div className={`grid grid-cols-3 grid-rows-2 gap-1 ${mosaicHeight}`}>
+      {renderSlot(0, "col-span-1 row-span-2 h-full min-h-0")}
+      {renderSlot(1, "col-span-1 row-span-2 h-full min-h-0")}
+      {renderSlot(2, "col-span-1 row-span-1 h-full min-h-0")}
+      {renderSlot(
+        3,
+        "col-span-1 row-span-1 h-full min-h-0",
+        extraCount > 0 ? `+${extraCount}` : undefined
+      )}
+    </div>
+  );
+
+  if (slides.length === 0) {
+    return (
+      <div className="w-full overflow-hidden bg-white">
+        <div className={`grid grid-cols-3 grid-rows-2 gap-1 ${mosaicHeight}`}>
+          <div
+            className={`col-span-2 row-span-2 flex items-center justify-center bg-gradient-to-br ${meta.imageGradient}`}
+          >
+            <span className="text-6xl sm:text-7xl">{meta.icon}</span>
+          </div>
+          <GalleryPlaceholder className="col-span-1 row-span-1 h-full min-h-0" />
+          <GalleryPlaceholder className="col-span-1 row-span-1 h-full min-h-0" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
       <div className="w-full overflow-hidden bg-white">{renderMosaic()}</div>
 
       {slides.length > 1 && (
-        <div className="mt-2 flex gap-2 overflow-x-auto pb-1">
+        <div className="mt-2 flex gap-2 overflow-x-auto px-4 pb-1 lg:px-0">
           {slides.map((url, index) => (
             <button
               key={`${url}-thumb-${index}`}

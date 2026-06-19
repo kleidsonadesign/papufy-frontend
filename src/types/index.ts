@@ -37,6 +37,18 @@ export interface ListingImage {
   ordem: number;
 }
 
+export interface ListingPublisher {
+  id: string;
+  nome: string;
+  cidade?: string | null;
+  uf?: string | null;
+  memberSince?: string;
+  lastSeenAt?: string;
+  verifiedEmail?: boolean;
+  verifiedPhone?: boolean;
+  reputation?: UserReputation;
+}
+
 export interface Listing {
   id: string;
   userId: string;
@@ -54,13 +66,7 @@ export interface Listing {
   uf: string;
   telefone?: string;
   createdAt: string;
-  criador?: {
-    id: string;
-    nome: string;
-    cidade?: string | null;
-    uf?: string | null;
-    reputation?: UserReputation;
-  };
+  criador?: ListingPublisher;
   imagens?: ListingImage[];
   imagemCapa?: string | null;
   isOwner?: boolean;

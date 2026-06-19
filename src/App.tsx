@@ -46,6 +46,11 @@ const ProfileWalletPage = lazy(() =>
     default: m.ProfileWalletPage,
   }))
 );
+const UserPublicProfilePage = lazy(() =>
+  import("./pages/UserPublicProfilePage").then((m) => ({
+    default: m.UserPublicProfilePage,
+  }))
+);
 const WalletPage = lazy(() =>
   import("./pages/WalletPage").then((m) => ({ default: m.WalletPage }))
 );
@@ -71,6 +76,7 @@ export default function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/buscar" element={<SearchPage />} />
                     <Route path="/anuncio/:id" element={<ListingDetailPage />} />
+                    <Route path="/usuario/:id" element={<UserPublicProfilePage />} />
                     <Route path="/entrar" element={<LoginPage />} />
                     <Route path="/anunciar/tipo" element={<AnunciarTipoPage />} />
                     <Route
