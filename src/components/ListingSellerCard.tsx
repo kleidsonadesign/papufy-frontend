@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { ListingPublisher } from "../types";
@@ -101,11 +100,12 @@ export function ListingSellerCard({
         )}
       </ul>
 
-      <Button variant="outline" className="mt-4 h-11 w-full rounded-xl" asChild>
-        <Link to={`/usuario/${publisher.id}`}>
-          Acessar perfil do anunciante
-        </Link>
-      </Button>
+      <Link
+        to={`/usuario/${publisher.id}`}
+        className="mt-4 flex h-11 w-full items-center justify-center rounded-xl border border-border bg-background text-sm font-medium text-foreground transition-colors hover:bg-muted"
+      >
+        Acessar perfil do anunciante
+      </Link>
 
       <Separator className="mt-5" />
       <div className="pt-4">
