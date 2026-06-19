@@ -162,6 +162,7 @@ export const api = {
       telefone?: string;
       cidade?: string;
       uf?: string;
+      dataNascimento?: string;
     }) =>
       request<AuthResponse>("/auth/register", {
         method: "POST",
@@ -182,6 +183,7 @@ export const api = {
       telefone?: string;
       cidade?: string;
       uf?: string;
+      dataNascimento?: string;
       senhaAtual?: string;
       novaSenha?: string;
     }) =>

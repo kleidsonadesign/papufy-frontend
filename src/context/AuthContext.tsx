@@ -24,6 +24,7 @@ interface AuthContextValue {
     telefone?: string;
     cidade?: string;
     uf?: string;
+    dataNascimento?: string;
   }) => Promise<void>;
   logout: () => void;
 }

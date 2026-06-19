@@ -114,7 +114,11 @@ export function LoginPage() {
   const [email, setEmail] = useState("");
   const [cpfCnpj, setCpfCnpj] = useState("");
   const [telefone, setTelefone] = useState("");
+  const [dataNascimento, setDataNascimento] = useState("");
   const [senha, setSenha] = useState("");
+
+  const cpfCnpjDigits = digitsOnly(cpfCnpj);
+  const isCpfRegister = cpfCnpjDigits.length === 11;
 
   const switchMode = (next: AuthMode) => {
     setMode(next);
@@ -138,6 +142,11 @@ export function LoginPage() {
           setLoading(false);
           return;
         }
+        if (cpfCnpjDigits.length === 11 && !dataNascimento) {
+          setError("Informe a data de nascimento.");
+          setLoading(false);
+          return;
+        }
 
         const phoneDigits = digitsOnly(telefone);
         await register({
@@ -148,6 +157,8 @@ export function LoginPage() {
           telefone: phoneDigits.length > 0 ? phoneDigits : undefined,
           cidade: filters.cidade,
           uf: filters.uf,
+          dataNascimento:
+            cpfCnpjDigits.length === 11 ? dataNascimento : undefined,
         });
         showToast("Conta criada com sucesso!", "success");
       }
@@ -256,6 +267,18 @@ export function LoginPage() {
                     className={inputClass}
                   />
                 </AuthField>
+
+                {isCpfRegister && (
+                  <AuthField label="Data de nascimento" icon={<IconUser />}>
+                    <input
+                      type="date"
+                      required
+                      value={dataNascimento}
+                      onChange={(e) => setDataNascimento(e.target.value)}
+                      className={inputClass}
+                    />
+                  </AuthField>
+                )}
               </>
             )}
 
@@ -281,8 +304,8 @@ export function LoginPage() {
 
             {mode === "register" && (
               <p className="text-xs leading-relaxed text-slate-500">
-                Use letras e números na senha. CPF/CNPJ é usado para pagamentos
-                seguros no marketplace.
+                Use letras e números na senha. CPF/CNPJ e data de nascimento (CPF)
+                são usados para pagamentos seguros no marketplace.
               </p>
             )}
 

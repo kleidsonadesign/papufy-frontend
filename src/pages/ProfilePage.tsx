@@ -32,6 +32,9 @@ export function ProfilePage() {
 
   const [nome, setNome] = useState(user?.nome ?? "");
   const [telefone, setTelefone] = useState(user?.telefone ?? "");
+  const [dataNascimento, setDataNascimento] = useState(
+    user?.dataNascimento?.slice(0, 10) ?? ""
+  );
   const [cidade, setCidade] = useState(user?.cidade ?? "");
   const [uf, setUf] = useState(user?.uf ?? "PB");
   const [senhaAtual, setSenhaAtual] = useState("");
@@ -68,15 +71,32 @@ export function ProfilePage() {
     void loadReputation();
   }, [loadCerts, loadReputation]);
 
+  useEffect(() => {
+    if (!user) return;
+    setNome(user.nome);
+    setTelefone(user.telefone ?? "");
+    setDataNascimento(user.dataNascimento?.slice(0, 10) ?? "");
+    setCidade(user.cidade ?? "");
+    setUf(user.uf ?? "PB");
+  }, [user]);
+
+  const isCpfProfile =
+    (user?.cpfCnpj?.replace(/\D/g, "") ?? "").length === 11;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
+      if (isCpfProfile && !dataNascimento) {
+        showToast("Informe a data de nascimento.", "error");
+        return;
+      }
       const { user: updated } = await api.auth.updateProfile({
         nome,
         telefone: telefone || undefined,
         cidade,
         uf,
+        dataNascimento: dataNascimento || undefined,
         senhaAtual: novaSenha ? senhaAtual : undefined,
         novaSenha: novaSenha || undefined,
       });
@@ -312,6 +332,22 @@ export function ProfilePage() {
               className="input-field mt-1"
               inputMode="tel"
             />
+          </div>
+          <div>
+            <Label>
+              Data de nascimento
+              {isCpfProfile ? " *" : ""}
+            </Label>
+            <input
+              type="date"
+              value={dataNascimento}
+              onChange={(e) => setDataNascimento(e.target.value)}
+              className="input-field mt-1"
+              required={isCpfProfile}
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Necessária para receber pagamentos e enviar propostas (CPF).
+            </p>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
