@@ -4,6 +4,7 @@ import { ListingCardMobile } from "../mobile/ListingCardMobile";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FadeContent } from "@/components/effects/FadeContent";
+import { resolveListingCategories } from "../../constants/categories";
 import { useFilters } from "../../context/FilterContext";
 import { useDebounce } from "../../hooks/useDebounce";
 import { useInfiniteListings } from "../../hooks/useInfiniteListings";
@@ -26,8 +27,8 @@ export function AppPageHome() {
   const query = useMemo(
     () => ({
       search: debouncedSearch || undefined,
-      category: filters.category || undefined,
-      listingType: filters.listingType || undefined,
+      // Pedidos + profissionais afins na mesma lista (sem filtrar por tipo).
+      categories: resolveListingCategories(filters.category),
       uf: filters.uf,
       cidade: filters.cidade,
       minPrice: filters.minPrice ?? undefined,
@@ -36,7 +37,6 @@ export function AppPageHome() {
     [
       debouncedSearch,
       filters.category,
-      filters.listingType,
       filters.uf,
       filters.cidade,
       filters.minPrice,
@@ -47,7 +47,7 @@ export function AppPageHome() {
   const professionalsQuery = useMemo(
     () => ({
       search: debouncedSearch || undefined,
-      category: filters.category || undefined,
+      categories: resolveListingCategories(filters.category),
       listingType: "PROFESSIONAL_PROFILE" as const,
       uf: filters.uf,
       cidade: filters.cidade,

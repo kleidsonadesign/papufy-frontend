@@ -197,6 +197,7 @@ export const api = {
     list: (params?: {
       search?: string;
       category?: string;
+      categories?: string[];
       listingType?: "JOB_VACANCY" | "PROFESSIONAL_PROFILE";
       location?: string;
       uf?: string;
@@ -208,7 +209,11 @@ export const api = {
     }) => {
       const query = new URLSearchParams();
       if (params?.search) query.set("search", params.search);
-      if (params?.category) query.set("category", params.category);
+      if (params?.categories && params.categories.length > 0) {
+        query.set("categories", params.categories.join(","));
+      } else if (params?.category) {
+        query.set("category", params.category);
+      }
       const listingType = normalizeListingType(params?.listingType);
       if (listingType) {
         query.set("listingType", listingType);

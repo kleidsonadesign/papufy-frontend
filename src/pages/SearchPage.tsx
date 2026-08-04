@@ -6,6 +6,7 @@ import { SearchBar } from "../components/mobile/SearchBar";
 import { ListingCardMobile } from "../components/mobile/ListingCardMobile";
 import { AutoAnimateList } from "../components/motion/AutoAnimateList";
 import { MotionEnter } from "../components/motion/MotionPrimitives";
+import { resolveListingCategories } from "../constants/categories";
 import { useFilters } from "../context/FilterContext";
 import { useDebounce } from "../hooks/useDebounce";
 import { useInfiniteListings } from "../hooks/useInfiniteListings";
@@ -17,8 +18,7 @@ export function SearchPage() {
   const query = useMemo(
     () => ({
       search: debouncedSearch || undefined,
-      category: filters.category || undefined,
-      listingType: filters.listingType || undefined,
+      categories: resolveListingCategories(filters.category),
       uf: filters.uf,
       cidade: filters.cidade,
       minPrice: filters.minPrice ?? undefined,
@@ -27,7 +27,6 @@ export function SearchPage() {
     [
       debouncedSearch,
       filters.category,
-      filters.listingType,
       filters.cidade,
       filters.uf,
       filters.minPrice,

@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  JOB_VACANCY_CATEGORIES,
-  PROFESSIONAL_PROFILE_CATEGORIES,
-} from "../../constants/categories";
+import { JOB_VACANCY_CATEGORIES } from "../../constants/categories";
 import { useFilters } from "../../context/FilterContext";
 
 interface FilterBottomSheetProps {
@@ -25,14 +22,12 @@ export function FilterBottomSheet({
   const [max, setMax] = useState(
     filters.maxPrice != null ? String(filters.maxPrice) : ""
   );
-  const [listingTypeLocal, setListingTypeLocal] = useState(filters.listingType);
   const [catLocal, setCatLocal] = useState(filters.category);
 
   useEffect(() => {
     if (open) {
       setMin(filters.minPrice != null ? String(filters.minPrice) : "");
       setMax(filters.maxPrice != null ? String(filters.maxPrice) : "");
-      setListingTypeLocal(filters.listingType);
       setCatLocal(filters.category);
       document.body.style.overflow = "hidden";
     } else {
@@ -45,15 +40,8 @@ export function FilterBottomSheet({
 
   if (!open) return null;
 
-  const categories =
-    listingTypeLocal === "PROFESSIONAL_PROFILE"
-      ? PROFESSIONAL_PROFILE_CATEGORIES
-      : listingTypeLocal === "JOB_VACANCY"
-        ? JOB_VACANCY_CATEGORIES
-        : [...JOB_VACANCY_CATEGORIES, ...PROFESSIONAL_PROFILE_CATEGORIES];
-
   const apply = () => {
-    setListingType(listingTypeLocal);
+    setListingType(null);
     setCategory(catLocal);
     setPriceRange(
       min ? parseFloat(min) : null,
@@ -98,31 +86,7 @@ export function FilterBottomSheet({
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-3 sm:py-4">
-          <p className="text-sm font-semibold text-papufy-text">Tipo</p>
-          <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-            {(
-              [
-                { v: null, l: "Todos" },
-                { v: "JOB_VACANCY" as const, l: "Pedidos" },
-                { v: "PROFESSIONAL_PROFILE" as const, l: "Profissionais" },
-              ] as const
-            ).map((opt) => (
-              <button
-                key={opt.l}
-                type="button"
-                onClick={() => setListingTypeLocal(opt.v)}
-                className={`h-10 rounded-xl border px-4 text-sm font-semibold active:scale-95 sm:h-9 sm:flex-initial ${
-                  listingTypeLocal === opt.v
-                    ? "border-sky-400 bg-sky-50 text-sky-600"
-                    : "border-papufy-border text-papufy-muted"
-                }`}
-              >
-                {opt.l}
-              </button>
-            ))}
-          </div>
-
-          <p className="mt-4 text-sm font-semibold text-papufy-text">
+          <p className="text-sm font-semibold text-papufy-text">
             Faixa de preço (R$)
           </p>
           <div className="mt-2 flex gap-2">
@@ -158,7 +122,7 @@ export function FilterBottomSheet({
               >
                 Todas
               </button>
-              {categories.map((c) => (
+              {JOB_VACANCY_CATEGORIES.map((c) => (
                 <button
                   key={c}
                   type="button"
@@ -185,7 +149,6 @@ export function FilterBottomSheet({
               resetFilters();
               setMin("");
               setMax("");
-              setListingTypeLocal(null);
               setCatLocal(null);
               onApply();
               onClose();

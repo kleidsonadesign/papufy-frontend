@@ -7,6 +7,7 @@ const PAGE_SIZE = 20;
 export interface ListingsQuery {
   search?: string;
   category?: string;
+  categories?: string[];
   listingType?: "JOB_VACANCY" | "PROFESSIONAL_PROFILE";
   location?: string;
   uf?: string;

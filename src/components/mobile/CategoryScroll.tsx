@@ -1,7 +1,5 @@
 import {
   HOME_ALL_FILTERS,
-  HOME_SERVICE_FILTERS,
-  HOME_TYPE_FILTERS,
   type ListingTypeFilter,
 } from "../../constants/categories";
 import { useFilters } from "../../context/FilterContext";
@@ -17,15 +15,10 @@ import { MotionPressButton } from "../motion/MotionPrimitives";
 function resolveActiveId(filters: JobFilters): string {
   const match = HOME_ALL_FILTERS.find((item) => {
     if (item.id === "all") {
-      return filters.listingType === null && filters.category === null;
-    }
-    if (item.listingType !== null) {
-      return (
-        filters.listingType === item.listingType && filters.category === null
-      );
+      return filters.category === null;
     }
     if (item.category !== null) {
-      return filters.category === item.category && filters.listingType === null;
+      return filters.category === item.category;
     }
     return false;
   });
@@ -84,17 +77,21 @@ export function CategoryScroll({ onChange }: CategoryScrollProps) {
   const { filters, setCategory, setListingType } = useFilters();
   const activeId = resolveActiveId(filters);
 
-  const apply = (listingType: ListingTypeFilter, category: string | null) => {
-    setListingType(listingType);
+  const apply = (_listingType: ListingTypeFilter, category: string | null) => {
+    setListingType(null);
     setCategory(category);
     onChange?.();
   };
+
+  // Duas fileiras: Todos + 3 categorias | restante das categorias
+  const firstRow = HOME_ALL_FILTERS.slice(0, 4);
+  const secondRow = HOME_ALL_FILTERS.slice(4);
 
   return (
     <section aria-label="Categorias" className="border-y border-slate-200/80 bg-white">
       <div className="space-y-2.5 px-2 py-2.5 sm:px-3 sm:py-3">
         <div className="flex w-full items-start justify-between gap-0.5">
-          {HOME_TYPE_FILTERS.map((item) => (
+          {firstRow.map((item) => (
             <MacroChip
               key={item.id}
               label={item.label}
@@ -104,17 +101,19 @@ export function CategoryScroll({ onChange }: CategoryScrollProps) {
             />
           ))}
         </div>
-        <div className="flex w-full items-start justify-between gap-0.5">
-          {HOME_SERVICE_FILTERS.map((item) => (
-            <MacroChip
-              key={item.id}
-              label={item.label}
-              iconKey={item.iconKey as LottieIconName}
-              isActive={activeId === item.id}
-              onSelect={() => apply(item.listingType, item.category)}
-            />
-          ))}
-        </div>
+        {secondRow.length > 0 && (
+          <div className="flex w-full items-start justify-between gap-0.5">
+            {secondRow.map((item) => (
+              <MacroChip
+                key={item.id}
+                label={item.label}
+                iconKey={item.iconKey as LottieIconName}
+                isActive={activeId === item.id}
+                onSelect={() => apply(item.listingType, item.category)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -195,22 +195,6 @@ export const MACRO_SCROLL_CATEGORIES = [
     category: null as string | null,
   },
   {
-    id: "pedidos",
-    label: "Pedidos",
-    icon: "📋",
-    iconKey: "clipboard" as CategoryIconKey,
-    listingType: "JOB_VACANCY" as const,
-    category: null as string | null,
-  },
-  {
-    id: "profissionais",
-    label: "Profissionais",
-    icon: "👷",
-    iconKey: "user" as CategoryIconKey,
-    listingType: "PROFESSIONAL_PROFILE" as const,
-    category: null as string | null,
-  },
-  {
     id: "assistencia",
     label: "Assistência",
     icon: "🔧",
@@ -236,10 +220,37 @@ export const MACRO_SCROLL_CATEGORIES = [
   },
 ] as const;
 
-/** Tipo de anúncio (mobile + desktop). */
+/** Só "Todos" — Pedidos/Profissionais não têm chip; misturam nas categorias. */
 export const HOME_TYPE_FILTERS = MACRO_SCROLL_CATEGORIES.filter(
-  (m) => m.id === "all" || m.id === "pedidos" || m.id === "profissionais"
+  (m) => m.id === "all"
 );
+
+/**
+ * Profissionais relacionados a cada categoria de pedido.
+ * Assim o perfil profissional aparece nos filtros de categoria sem aba própria.
+ */
+export const PROFESSIONALS_BY_JOB_CATEGORY: Record<string, string[]> = {
+  "Assistência Técnica": ["Eletricista", "Encanador", "Outros Serviços"],
+  "Reformas e Reparos": [
+    "Eletricista",
+    "Encanador",
+    "Pintor",
+    "Outros Serviços",
+  ],
+  "Serviços Domésticos": ["Diarista", "Pintor", "Outros Serviços"],
+  "Design e Tecnologia": ["Designer", "Outros Serviços"],
+  "Aulas e Consultoria": ["Professor Particular", "Outros Serviços"],
+  Eventos: ["Outros Serviços"],
+};
+
+/** Categorias a consultar na API para um filtro da home (pedido + profissionais afins). */
+export function resolveListingCategories(
+  category: string | null
+): string[] | undefined {
+  if (!category) return undefined;
+  const related = PROFESSIONALS_BY_JOB_CATEGORY[category] ?? [];
+  return Array.from(new Set([category, ...related]));
+}
 
 /** Categorias de serviço (mobile + desktop) — mesmas nos dois. */
 export const HOME_SERVICE_FILTERS = [
@@ -272,7 +283,7 @@ export const HOME_SERVICE_FILTERS = [
   },
 ] as const;
 
-/** Todos os filtros da home (tipo + categorias). */
+/** Todos + categorias (sem chips de tipo Pedidos/Profissionais). */
 export const HOME_ALL_FILTERS = [
   ...HOME_TYPE_FILTERS,
   ...HOME_SERVICE_FILTERS,

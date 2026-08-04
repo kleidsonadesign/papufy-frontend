@@ -13,7 +13,6 @@ import {
   isLocationManual,
   markLocationManual,
 } from "../lib/geolocation";
-import { normalizeListingType } from "../lib/listingType";
 
 export interface JobFilters {
   search: string;
@@ -57,12 +56,11 @@ function loadFilters(): JobFilters {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as Partial<JobFilters> & { tipo?: string };
-      const listingType =
-        normalizeListingType(parsed.listingType ?? parsed.tipo) ?? null;
       return {
         ...DEFAULT_FILTERS,
         ...parsed,
-        listingType,
+        // Pedidos/Profissionais não têm filtro de tipo; misturam nas categorias.
+        listingType: null,
       };
     }
   } catch {
