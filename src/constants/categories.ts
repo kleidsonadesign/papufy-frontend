@@ -236,5 +236,47 @@ export const MACRO_SCROLL_CATEGORIES = [
   },
 ] as const;
 
+/** Tipo de anúncio (mobile + desktop). */
+export const HOME_TYPE_FILTERS = MACRO_SCROLL_CATEGORIES.filter(
+  (m) => m.id === "all" || m.id === "pedidos" || m.id === "profissionais"
+);
+
+/** Categorias de serviço (mobile + desktop) — mesmas nos dois. */
+export const HOME_SERVICE_FILTERS = [
+  ...MACRO_SCROLL_CATEGORIES.filter(
+    (m) => m.id === "assistencia" || m.id === "reformas" || m.id === "servicos"
+  ),
+  {
+    id: "design",
+    label: "Design",
+    icon: "💻",
+    iconKey: "monitor" as CategoryIconKey,
+    listingType: null as ListingTypeFilter,
+    category: "Design e Tecnologia" as string | null,
+  },
+  {
+    id: "aulas",
+    label: "Aulas",
+    icon: "📚",
+    iconKey: "book" as CategoryIconKey,
+    listingType: null as ListingTypeFilter,
+    category: "Aulas e Consultoria" as string | null,
+  },
+  {
+    id: "eventos",
+    label: "Eventos",
+    icon: "🎉",
+    iconKey: "party" as CategoryIconKey,
+    listingType: null as ListingTypeFilter,
+    category: "Eventos" as string | null,
+  },
+] as const;
+
+/** Todos os filtros da home (tipo + categorias). */
+export const HOME_ALL_FILTERS = [
+  ...HOME_TYPE_FILTERS,
+  ...HOME_SERVICE_FILTERS,
+] as const;
+
 /** @deprecated Use MACRO_SCROLL_CATEGORIES */
 export const SCROLL_CATEGORIES = MACRO_SCROLL_CATEGORIES;

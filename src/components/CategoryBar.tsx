@@ -1,7 +1,7 @@
 import {
-  JOB_VACANCY_CATEGORIES,
-  MACRO_SCROLL_CATEGORIES,
-  getCategoryMeta,
+  HOME_ALL_FILTERS,
+  HOME_SERVICE_FILTERS,
+  HOME_TYPE_FILTERS,
   type ListingTypeFilter,
 } from "../constants/categories";
 import { useFilters } from "../context/FilterContext";
@@ -18,40 +18,10 @@ interface CategoryBarProps {
   onCategorySelect?: () => void;
 }
 
-type DesktopFilter = {
-  id: string;
-  label: string;
-  iconKey: LottieIconName;
-  listingType: ListingTypeFilter;
-  category: string | null;
-};
-
-/** Mesmos macros do mobile + categorias de pedido que não estão no carrossel. */
-const MACRO_CATEGORY_IDS = new Set(
-  MACRO_SCROLL_CATEGORIES.map((m) => m.category).filter(Boolean)
-);
-
-const DESKTOP_FILTERS: DesktopFilter[] = [
-  ...MACRO_SCROLL_CATEGORIES.map((m) => ({
-    id: m.id,
-    label: m.label,
-    iconKey: m.iconKey as LottieIconName,
-    listingType: m.listingType,
-    category: m.category,
-  })),
-  ...JOB_VACANCY_CATEGORIES.filter((c) => !MACRO_CATEGORY_IDS.has(c)).map(
-    (category) => ({
-      id: category,
-      label: category,
-      iconKey: getCategoryMeta(category).iconKey as LottieIconName,
-      listingType: null as ListingTypeFilter,
-      category,
-    })
-  ),
-];
+type HomeFilter = (typeof HOME_ALL_FILTERS)[number];
 
 function resolveActiveId(filters: JobFilters): string {
-  const match = DESKTOP_FILTERS.find((item) => {
+  const match = HOME_ALL_FILTERS.find((item) => {
     if (item.id === "all") {
       return filters.listingType === null && filters.category === null;
     }
@@ -112,6 +82,37 @@ function FilterChip({
   );
 }
 
+function FilterRow({
+  title,
+  items,
+  activeId,
+  onSelect,
+}: {
+  title: string;
+  items: readonly HomeFilter[];
+  activeId: string;
+  onSelect: (listingType: ListingTypeFilter, category: string | null) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+        {title}
+      </p>
+      <div className="scrollbar-hide flex flex-wrap justify-start gap-5 pb-0.5 sm:gap-7">
+        {items.map((item) => (
+          <FilterChip
+            key={item.id}
+            label={item.label}
+            iconKey={item.iconKey as LottieIconName}
+            isActive={activeId === item.id}
+            onSelect={() => onSelect(item.listingType, item.category)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function CategoryBar({ onCategorySelect }: CategoryBarProps) {
   const { filters, setCategory, setListingType } = useFilters();
   const activeId = resolveActiveId(filters);
@@ -127,18 +128,19 @@ export function CategoryBar({ onCategorySelect }: CategoryBarProps) {
 
   return (
     <section className="border-y border-slate-200/80 bg-white" aria-label="Categorias">
-      <div className="page-container py-3 lg:py-3.5">
-        <div className="scrollbar-hide snap-x-mandatory flex justify-center gap-5 overflow-x-auto pb-0.5 sm:gap-7">
-          {DESKTOP_FILTERS.map((item) => (
-            <FilterChip
-              key={item.id}
-              label={item.label}
-              iconKey={item.iconKey}
-              isActive={activeId === item.id}
-              onSelect={() => handleSelect(item.listingType, item.category)}
-            />
-          ))}
-        </div>
+      <div className="page-container space-y-4 py-3 lg:py-4">
+        <FilterRow
+          title="Tipo"
+          items={HOME_TYPE_FILTERS}
+          activeId={activeId}
+          onSelect={handleSelect}
+        />
+        <FilterRow
+          title="Categorias"
+          items={HOME_SERVICE_FILTERS}
+          activeId={activeId}
+          onSelect={handleSelect}
+        />
       </div>
     </section>
   );
