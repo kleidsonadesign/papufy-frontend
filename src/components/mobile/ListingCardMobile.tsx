@@ -116,7 +116,7 @@ export function ListingCardMobile({
             <AnimatedLordIcon
               name="heart"
               size={compact ? 18 : 22}
-              scale={1.75}
+              scale={1.25}
               playToken={heartPlay}
               className={favorited ? "opacity-100" : "opacity-80"}
             />
