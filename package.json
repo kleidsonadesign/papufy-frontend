@@ -13,7 +13,7 @@
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.9",
     "@formkit/auto-animate": "^0.10.0",
-    "@lottiefiles/dotlottie-react": "^0.19.12",
+    "@lordicon/element": "^2.3.1",
     "@radix-ui/react-dialog": "^1.1.17",
     "@radix-ui/react-label": "^2.1.10",
     "@radix-ui/react-separator": "^1.1.10",
@@ -21,6 +21,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dompurify": "^3.4.5",
+    "lottie-web": "^5.13.0",
     "lucide-react": "^1.24.0",
     "motion": "^12.43.0",
     "radix-ui": "^1.6.0",

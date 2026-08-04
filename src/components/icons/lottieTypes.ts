@@ -1,0 +1,22 @@
+/** Chaves alinhadas a CategoryIconKey + ações (favorito/chat). */
+export type LottieIconName =
+  | "grid"
+  | "todos"
+  | "clipboard"
+  | "user"
+  | "headset"
+  | "hardhat"
+  | "brush"
+  | "wrench"
+  | "monitor"
+  | "book"
+  | "party"
+  | "phone"
+  | "sofa"
+  | "car"
+  | "shirt"
+  | "ball"
+  | "plant"
+  | "box"
+  | "heart"
+  | "chat";
