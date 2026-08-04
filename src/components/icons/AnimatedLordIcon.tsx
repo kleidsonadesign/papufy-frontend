@@ -60,6 +60,13 @@ const LOTTIE_SRC: Record<LottieIconName, string> = {
 interface AnimatedLordIconProps {
   name: LottieIconName;
   size?: number;
+  /**
+   * Amplia o desenho dentro do box (assets Lottie/Lordicon vêm com padding).
+   * Ex.: 1.9 preenche quase até a borda do container.
+   */
+  scale?: number;
+  /** Se true, ocupa 100% do pai (ignore size em px no layout). */
+  fill?: boolean;
   className?: string;
   autoplayOnce?: boolean;
   /** Incrementar/alterar para disparar play (ex.: clique favorito). */
@@ -71,6 +78,8 @@ interface AnimatedLordIconProps {
 export function AnimatedLordIcon({
   name,
   size = 28,
+  scale = 1,
+  fill = false,
   className = "",
   autoplayOnce = false,
   playToken,
@@ -105,14 +114,23 @@ export function AnimatedLordIcon({
   return (
     <span
       className={`inline-flex shrink-0 items-center justify-center overflow-hidden ${className}`}
-      style={{ width: size, height: size, ...style }}
+      style={{
+        width: fill ? "100%" : size,
+        height: fill ? "100%" : size,
+        ...style,
+      }}
       aria-hidden
     >
       <DotLottieReact
         src={src}
         autoplay={loop}
         loop={loop}
-        style={{ width: size, height: size }}
+        style={{
+          width: "100%",
+          height: "100%",
+          transform: scale !== 1 ? `scale(${scale})` : undefined,
+          transformOrigin: "center",
+        }}
         dotLottieRefCallback={setPlayer}
       />
     </span>

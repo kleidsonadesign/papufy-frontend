@@ -66,9 +66,10 @@ function MacroChip({
         />
         <AnimatedLordIcon
           name={iconKey}
-          size={28}
+          fill
+          scale={1.95}
           playToken={playToken}
-          className="relative z-10"
+          className="relative z-10 h-full w-full"
         />
       </span>
       <span
