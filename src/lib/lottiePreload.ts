@@ -1,15 +1,8 @@
 import { LOTTIE_SRC } from "./lottieSrc";
 import type { LottieIconName } from "../components/icons/lottieTypes";
 
-/** Escala menor em ícones com mais padding interno (evita corte). */
-const COMPACT_SCALE_ICONS = new Set<LottieIconName>([
-  "headset",
-  "hardhat",
-  "book",
-]);
-
-export function getLordIconScale(name: LottieIconName): number {
-  return COMPACT_SCALE_ICONS.has(name) ? 1.15 : 1.25;
+export function getLordIconScale(_name?: LottieIconName): number {
+  return 1.1;
 }
 
 const CATEGORY_LOTTIE_URLS = Array.from(
