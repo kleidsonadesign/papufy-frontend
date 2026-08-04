@@ -446,6 +446,7 @@ export function ListingDetailPage() {
                     scale={1}
                     playToken={chatPlay}
                     loop={contactLoading}
+                    colors="primary:#ffffff,secondary:#e0f2fe"
                   />
                   {contactLoading ? "Abrindo chat..." : ctaLabel}
                 </MotionPressButton>
@@ -534,6 +535,7 @@ export function ListingDetailPage() {
               scale={1}
               playToken={chatPlay}
               loop={contactLoading}
+              colors="primary:#ffffff,secondary:#e0f2fe"
             />
             {contactLoading ? "Abrindo chat..." : ctaLabel}
           </MotionPressButton>

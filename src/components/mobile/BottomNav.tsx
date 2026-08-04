@@ -3,10 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useAuth } from "../../context/AuthContext";
 import { useChat } from "../../context/ChatContext";
 import {
-  AnimatedLordIcon,
-  useLordPlay,
-} from "../icons/AnimatedLordIcon";
-import {
+  IconChat,
   IconHome,
   IconPlus,
   IconSearch,
@@ -21,7 +18,6 @@ export function BottomNav() {
   const { isAuthenticated } = useAuth();
   const { unreadCount } = useChat();
   const navigate = useNavigate();
-  const { playToken: chatPlay, trigger: triggerChat } = useLordPlay();
 
   if (HIDDEN.some((p) => pathname.startsWith(p))) return null;
 
@@ -44,7 +40,6 @@ export function BottomNav() {
   };
 
   const handleChat = () => {
-    triggerChat();
     if (!isAuthenticated) {
       navigate("/entrar", { state: { redirect: "/chat" } });
       return;
@@ -111,18 +106,7 @@ export function BottomNav() {
           }
         >
           <span className="relative flex h-6 w-6 items-center justify-center">
-            <AnimatedLordIcon
-              name="chat"
-              fill
-              scale={1}
-              playToken={chatPlay}
-              colors={
-                isActive("/chat")
-                  ? "primary:#0ea5e9,secondary:#38bdf8"
-                  : "primary:#64748b,secondary:#94a3b8"
-              }
-              className="h-6 w-6"
-            />
+            <IconChat className="h-6 w-6" />
             <AnimatePresence>
               {isAuthenticated && unreadCount > 0 && (
                 <motion.span

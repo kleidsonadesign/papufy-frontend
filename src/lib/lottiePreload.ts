@@ -27,12 +27,21 @@ const CATEGORY_LOTTIE_URLS = Array.from(
   )
 );
 
-/** Pré-busca os JSON das categorias (o player Lordicon carrega do cache HTTP). */
+/** Pré-busca os JSON das categorias (cache HTTP para o Lordicon). */
 export function preloadCategoryLotties(): void {
-  for (const url of CATEGORY_LOTTIE_URLS) {
-    void fetch(url).catch(() => {
-      /* ignore */
-    });
+  if (typeof window === "undefined") return;
+  // Idle: não competir com o first paint.
+  const run = () => {
+    for (const url of CATEGORY_LOTTIE_URLS) {
+      void fetch(url, { credentials: "same-origin" }).catch(() => {
+        /* ignore */
+      });
+    }
+  };
+  if ("requestIdleCallback" in window) {
+    window.requestIdleCallback(run, { timeout: 2500 });
+  } else {
+    window.setTimeout(run, 400);
   }
 }
 
