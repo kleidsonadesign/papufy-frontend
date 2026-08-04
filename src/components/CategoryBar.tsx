@@ -2,7 +2,6 @@ import {
   JOB_VACANCY_CATEGORIES,
   MACRO_SCROLL_CATEGORIES,
   getCategoryMeta,
-  type JobVacancyCategory,
   type ListingTypeFilter,
 } from "../constants/categories";
 import { useFilters } from "../context/FilterContext";
