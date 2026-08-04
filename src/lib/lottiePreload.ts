@@ -38,8 +38,11 @@ export function preloadCategoryLotties(): void {
       });
     }
   };
-  if ("requestIdleCallback" in window) {
-    window.requestIdleCallback(run, { timeout: 2500 });
+  const w = window as Window & {
+    requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+  };
+  if (typeof w.requestIdleCallback === "function") {
+    w.requestIdleCallback(run, { timeout: 2500 });
   } else {
     window.setTimeout(run, 400);
   }
