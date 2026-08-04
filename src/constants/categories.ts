@@ -50,7 +50,7 @@ export const CATEGORY_META: Record<
 > = {
   "Assistência Técnica": {
     icon: "🔧",
-    iconKey: "wrench",
+    iconKey: "headset",
     color: "bg-sky-100 text-sky-800",
     imageGradient: "from-sky-500 to-sky-700",
   },
@@ -214,7 +214,7 @@ export const MACRO_SCROLL_CATEGORIES = [
     id: "assistencia",
     label: "Assistência",
     icon: "🔧",
-    iconKey: "wrench" as CategoryIconKey,
+    iconKey: "headset" as CategoryIconKey,
     listingType: null as ListingTypeFilter,
     category: "Assistência Técnica",
   },
