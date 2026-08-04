@@ -48,7 +48,7 @@ function MacroChip({
         trigger();
         onSelect();
       }}
-      className="group flex w-[3.35rem] shrink-0 flex-col items-center justify-center gap-1 outline-none sm:w-[4.25rem]"
+      className="group flex w-[3.75rem] shrink-0 snap-start flex-col items-center justify-center gap-1 outline-none sm:w-[4.25rem]"
       aria-pressed={isActive}
     >
       <CategoryIconShell isActive={isActive} size="sm">
@@ -61,7 +61,7 @@ function MacroChip({
         />
       </CategoryIconShell>
       <span
-        className={`line-clamp-2 w-full text-center text-[8px] leading-tight transition duration-300 sm:text-[9px] ${
+        className={`line-clamp-2 w-full text-center text-[9px] leading-tight transition duration-300 ${
           isActive
             ? "font-semibold text-sky-700"
             : "font-medium text-sky-600 group-hover:font-semibold group-hover:text-sky-700"
@@ -85,8 +85,8 @@ export function CategoryScroll({ onChange }: CategoryScrollProps) {
 
   return (
     <section aria-label="Categorias" className="border-y border-slate-200/80 bg-white">
-      <div className="px-1.5 py-2.5 sm:px-3 sm:py-3">
-        <div className="flex w-full flex-wrap items-start justify-center gap-x-0.5 gap-y-2 sm:gap-x-2">
+      <div className="py-2.5 sm:py-3">
+        <div className="scrollbar-hide flex w-full snap-x snap-mandatory items-start justify-start gap-1 overflow-x-auto overscroll-x-contain px-3 sm:gap-2 sm:px-4 [-webkit-overflow-scrolling:touch]">
           {HOME_ALL_FILTERS.map((item) => (
             <MacroChip
               key={item.id}
