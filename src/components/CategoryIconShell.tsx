@@ -29,10 +29,10 @@ export function CategoryIconShell({
         isActive
           ? {
               scale: compact ? 1.04 : 1.06,
-              backgroundColor: "rgba(186, 230, 253, 0.95)",
+              backgroundColor: "rgba(186, 230, 253, 0.35)",
               boxShadow: compact
-                ? "0 0 0 1.5px rgba(56, 189, 248, 0.95), 0 0 0 4px rgba(56, 189, 248, 0.22)"
-                : "0 0 0 2px rgba(56, 189, 248, 0.95), 0 0 0 6px rgba(56, 189, 248, 0.28), 0 10px 22px rgba(14, 165, 233, 0.28)",
+                ? "0 0 0 1.5px rgba(56, 189, 248, 0.45), 0 0 0 4px rgba(56, 189, 248, 0.1)"
+                : "0 0 0 2px rgba(56, 189, 248, 0.4), 0 0 0 6px rgba(56, 189, 248, 0.12), 0 8px 18px rgba(14, 165, 233, 0.1)",
             }
           : {
               scale: 1,
@@ -46,15 +46,15 @@ export function CategoryIconShell({
           ? {
               scale: compact ? 1.06 : 1.08,
               boxShadow: compact
-                ? "0 0 0 1.5px rgba(14, 165, 233, 1), 0 0 0 5px rgba(56, 189, 248, 0.28)"
-                : "0 0 0 2px rgba(14, 165, 233, 1), 0 0 0 8px rgba(56, 189, 248, 0.35), 0 12px 26px rgba(14, 165, 233, 0.34)",
+                ? "0 0 0 1.5px rgba(14, 165, 233, 0.55), 0 0 0 5px rgba(56, 189, 248, 0.14)"
+                : "0 0 0 2px rgba(14, 165, 233, 0.5), 0 0 0 8px rgba(56, 189, 248, 0.16), 0 10px 22px rgba(14, 165, 233, 0.12)",
             }
           : {
               scale: compact ? 1.04 : 1.05,
-              backgroundColor: "rgba(224, 242, 254, 0.95)",
+              backgroundColor: "rgba(224, 242, 254, 0.4)",
               boxShadow: compact
-                ? "0 0 0 1.5px rgba(125, 211, 252, 0.95), 0 0 0 4px rgba(56, 189, 248, 0.2)"
-                : "0 0 0 2px rgba(125, 211, 252, 0.95), 0 0 0 5px rgba(56, 189, 248, 0.22), 0 8px 18px rgba(14, 165, 233, 0.2)",
+                ? "0 0 0 1.5px rgba(125, 211, 252, 0.45), 0 0 0 4px rgba(56, 189, 248, 0.1)"
+                : "0 0 0 2px rgba(125, 211, 252, 0.4), 0 0 0 5px rgba(56, 189, 248, 0.1), 0 6px 14px rgba(14, 165, 233, 0.08)",
             }
       }
       transition={{ type: "spring", stiffness: 420, damping: 26 }}
