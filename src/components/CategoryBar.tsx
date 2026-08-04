@@ -48,7 +48,7 @@ function FilterChip({
         trigger();
         onSelect();
       }}
-      className="group snap-start flex min-w-[4.5rem] shrink-0 flex-col items-center gap-2 outline-none sm:min-w-[5rem]"
+      className="group snap-start flex w-[4.75rem] shrink-0 flex-col items-center justify-center gap-2 outline-none sm:w-[5.25rem]"
       aria-pressed={isActive}
     >
       <CategoryIconShell isActive={isActive}>
@@ -61,7 +61,7 @@ function FilterChip({
         />
       </CategoryIconShell>
       <span
-        className={`max-w-[5.5rem] text-center text-[11px] leading-tight transition duration-300 sm:text-xs ${
+        className={`w-full text-center text-[11px] leading-tight transition duration-300 sm:text-xs ${
           isActive
             ? "font-semibold text-sky-700"
             : "font-medium text-sky-600 group-hover:font-semibold group-hover:text-sky-700"
@@ -89,7 +89,7 @@ export function CategoryBar({ onCategorySelect }: CategoryBarProps) {
   return (
     <section className="border-y border-slate-200/80 bg-white" aria-label="Categorias">
       <div className="page-container py-3 lg:py-4">
-        <div className="scrollbar-hide flex flex-wrap justify-start gap-5 pb-0.5 sm:gap-7">
+        <div className="scrollbar-hide flex flex-wrap items-start justify-center gap-5 pb-0.5 sm:gap-7">
           {HOME_ALL_FILTERS.map((item) => (
             <FilterChip
               key={item.id}

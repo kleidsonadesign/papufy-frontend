@@ -48,7 +48,7 @@ function MacroChip({
         trigger();
         onSelect();
       }}
-      className="group flex min-w-0 flex-1 flex-col items-center gap-1 outline-none"
+      className="group flex w-[4.25rem] shrink-0 flex-col items-center justify-center gap-1 outline-none"
       aria-pressed={isActive}
     >
       <CategoryIconShell isActive={isActive} size="sm">
@@ -90,7 +90,7 @@ export function CategoryScroll({ onChange }: CategoryScrollProps) {
   return (
     <section aria-label="Categorias" className="border-y border-slate-200/80 bg-white">
       <div className="space-y-2.5 px-2 py-2.5 sm:px-3 sm:py-3">
-        <div className="flex w-full items-start justify-between gap-0.5">
+        <div className="flex w-full items-start justify-center gap-1 sm:gap-2">
           {firstRow.map((item) => (
             <MacroChip
               key={item.id}
@@ -102,7 +102,7 @@ export function CategoryScroll({ onChange }: CategoryScrollProps) {
           ))}
         </div>
         {secondRow.length > 0 && (
-          <div className="flex w-full items-start justify-between gap-0.5">
+          <div className="flex w-full items-start justify-center gap-1 sm:gap-2">
             {secondRow.map((item) => (
               <MacroChip
                 key={item.id}
