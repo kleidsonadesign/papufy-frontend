@@ -10,6 +10,7 @@ import {
   type LottieIconName,
 } from "../icons/AnimatedLordIcon";
 import { MotionPressButton } from "../motion/MotionPrimitives";
+import { getLordIconScale } from "../../lib/lottiePreload";
 
 function resolveActiveMacroId(filters: JobFilters): string {
   const match = MACRO_SCROLL_CATEGORIES.find((macro) => {
@@ -67,7 +68,7 @@ function MacroChip({
         <AnimatedLordIcon
           name={iconKey}
           fill
-          scale={1.25}
+          scale={getLordIconScale(iconKey)}
           playToken={playToken}
           className="relative z-10 h-full w-full"
         />

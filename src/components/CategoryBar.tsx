@@ -10,6 +10,7 @@ import {
   type LottieIconName,
 } from "./icons/AnimatedLordIcon";
 import { MotionPressButton } from "./motion/MotionPrimitives";
+import { getLordIconScale } from "../lib/lottiePreload";
 
 interface CategoryBarProps {
   onCategorySelect?: () => void;
@@ -68,7 +69,7 @@ function FilterChip({
         <AnimatedLordIcon
           name={iconKey}
           fill
-          scale={1.25}
+          scale={getLordIconScale(iconKey)}
           playToken={playToken}
           className="relative z-10 h-full w-full"
         />
