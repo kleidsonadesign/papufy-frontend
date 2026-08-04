@@ -9,6 +9,7 @@ import {
   useLordPlay,
   type LottieIconName,
 } from "../icons/AnimatedLordIcon";
+import { CategoryIconShell } from "../CategoryIconShell";
 import { MotionPressButton } from "../motion/MotionPrimitives";
 import { getLordIconScale } from "../../lib/lottiePreload";
 
@@ -53,26 +54,18 @@ function MacroChip({
         trigger();
         onSelect();
       }}
-      className="group flex w-[4.5rem] shrink-0 flex-col items-center gap-1.5 outline-none"
+      className="group flex w-[4.5rem] shrink-0 flex-col items-center gap-2 outline-none"
       aria-pressed={isActive}
     >
-      <span className="relative flex h-11 w-11 items-center justify-center">
-        <span
-          aria-hidden
-          className={`pointer-events-none absolute inset-0 rounded-2xl transition duration-300 ease-out ${
-            isActive
-              ? "scale-100 bg-sky-400/20 opacity-100 shadow-[0_0_18px_rgba(56,189,248,0.35)]"
-              : "scale-75 opacity-0 group-hover:scale-100 group-hover:bg-sky-400/18 group-hover:opacity-100"
-          }`}
-        />
+      <CategoryIconShell isActive={isActive} className="!h-11 !w-11 sm:!h-11 sm:!w-11">
         <AnimatedLordIcon
           name={iconKey}
           fill
           scale={getLordIconScale(iconKey)}
           playToken={playToken}
-          className="relative z-10 h-full w-full"
+          className="h-full w-full"
         />
-      </span>
+      </CategoryIconShell>
       <span
         className={`line-clamp-2 w-full text-center text-[11px] leading-tight transition duration-300 ${
           isActive

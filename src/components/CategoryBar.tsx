@@ -9,6 +9,7 @@ import {
   useLordPlay,
   type LottieIconName,
 } from "./icons/AnimatedLordIcon";
+import { CategoryIconShell } from "./CategoryIconShell";
 import { MotionPressButton } from "./motion/MotionPrimitives";
 import { getLordIconScale } from "../lib/lottiePreload";
 
@@ -54,26 +55,18 @@ function FilterChip({
         trigger();
         onSelect();
       }}
-      className="group snap-start flex min-w-[4.5rem] shrink-0 flex-col items-center gap-1.5 outline-none sm:min-w-[5rem]"
+      className="group snap-start flex min-w-[4.5rem] shrink-0 flex-col items-center gap-2 outline-none sm:min-w-[5rem]"
       aria-pressed={isActive}
     >
-      <span className="relative flex h-11 w-11 items-center justify-center sm:h-12 sm:w-12">
-        <span
-          aria-hidden
-          className={`pointer-events-none absolute inset-0 rounded-2xl transition duration-300 ease-out ${
-            isActive
-              ? "scale-100 bg-sky-400/20 opacity-100 shadow-[0_0_20px_rgba(56,189,248,0.35)]"
-              : "scale-75 bg-sky-400/0 opacity-0 group-hover:scale-100 group-hover:bg-sky-400/18 group-hover:opacity-100"
-          }`}
-        />
+      <CategoryIconShell isActive={isActive}>
         <AnimatedLordIcon
           name={iconKey}
           fill
           scale={getLordIconScale(iconKey)}
           playToken={playToken}
-          className="relative z-10 h-full w-full"
+          className="h-full w-full"
         />
-      </span>
+      </CategoryIconShell>
       <span
         className={`max-w-[5.5rem] text-center text-[11px] leading-tight transition duration-300 sm:text-xs ${
           isActive
