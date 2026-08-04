@@ -443,7 +443,7 @@ export function ListingDetailPage() {
                   <AnimatedLordIcon
                     name="chat"
                     size={26}
-                    scale={1.1}
+                    scale={1}
                     playToken={chatPlay}
                     loop={contactLoading}
                   />
@@ -531,7 +531,7 @@ export function ListingDetailPage() {
             <AnimatedLordIcon
               name="chat"
               size={26}
-              scale={1.1}
+              scale={1}
               playToken={chatPlay}
               loop={contactLoading}
             />

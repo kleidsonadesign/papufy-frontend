@@ -60,7 +60,7 @@ function MacroChip({
         <AnimatedLordIcon
           name={iconKey}
           fill
-          scale={1.05}
+          scale={1}
           playToken={playToken}
           className="h-full w-full"
         />

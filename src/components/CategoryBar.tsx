@@ -1,9 +1,12 @@
 import {
   JOB_VACANCY_CATEGORIES,
+  MACRO_SCROLL_CATEGORIES,
   getCategoryMeta,
   type JobVacancyCategory,
+  type ListingTypeFilter,
 } from "../constants/categories";
 import { useFilters } from "../context/FilterContext";
+import type { JobFilters } from "../context/FilterContext";
 import {
   AnimatedLordIcon,
   useLordPlay,
@@ -11,30 +14,60 @@ import {
 } from "./icons/AnimatedLordIcon";
 import { CategoryIconShell } from "./CategoryIconShell";
 import { MotionPressButton } from "./motion/MotionPrimitives";
-import { getLordIconScale } from "../lib/lottiePreload";
 
 interface CategoryBarProps {
   onCategorySelect?: () => void;
 }
 
-type DesktopFilter =
-  | { id: "all"; label: "Todos"; iconKey: LottieIconName; category: null }
-  | {
-      id: string;
-      label: JobVacancyCategory;
-      iconKey: LottieIconName;
-      category: JobVacancyCategory;
-    };
+type DesktopFilter = {
+  id: string;
+  label: string;
+  iconKey: LottieIconName;
+  listingType: ListingTypeFilter;
+  category: string | null;
+};
+
+/** Mesmos macros do mobile + categorias de pedido que não estão no carrossel. */
+const MACRO_CATEGORY_IDS = new Set(
+  MACRO_SCROLL_CATEGORIES.map((m) => m.category).filter(Boolean)
+);
 
 const DESKTOP_FILTERS: DesktopFilter[] = [
-  { id: "all", label: "Todos", iconKey: "todos", category: null },
-  ...JOB_VACANCY_CATEGORIES.map((category) => ({
-    id: category,
-    label: category,
-    iconKey: getCategoryMeta(category).iconKey as LottieIconName,
-    category,
+  ...MACRO_SCROLL_CATEGORIES.map((m) => ({
+    id: m.id,
+    label: m.label,
+    iconKey: m.iconKey as LottieIconName,
+    listingType: m.listingType,
+    category: m.category,
   })),
+  ...JOB_VACANCY_CATEGORIES.filter((c) => !MACRO_CATEGORY_IDS.has(c)).map(
+    (category) => ({
+      id: category,
+      label: category,
+      iconKey: getCategoryMeta(category).iconKey as LottieIconName,
+      listingType: null as ListingTypeFilter,
+      category,
+    })
+  ),
 ];
+
+function resolveActiveId(filters: JobFilters): string {
+  const match = DESKTOP_FILTERS.find((item) => {
+    if (item.id === "all") {
+      return filters.listingType === null && filters.category === null;
+    }
+    if (item.listingType !== null) {
+      return (
+        filters.listingType === item.listingType && filters.category === null
+      );
+    }
+    if (item.category !== null) {
+      return filters.category === item.category && filters.listingType === null;
+    }
+    return false;
+  });
+  return match?.id ?? "all";
+}
 
 function FilterChip({
   label,
@@ -62,7 +95,7 @@ function FilterChip({
         <AnimatedLordIcon
           name={iconKey}
           fill
-          scale={getLordIconScale(iconKey)}
+          scale={1}
           playToken={playToken}
           className="h-full w-full"
         />
@@ -82,17 +115,14 @@ function FilterChip({
 
 export function CategoryBar({ onCategorySelect }: CategoryBarProps) {
   const { filters, setCategory, setListingType } = useFilters();
+  const activeId = resolveActiveId(filters);
 
-  const handleSelect = (category: JobVacancyCategory | null) => {
-    if (category === null) {
-      setCategory(null);
-      setListingType(null);
-    } else if (filters.category === category) {
-      setCategory(null);
-    } else {
-      setListingType(null);
-      setCategory(category);
-    }
+  const handleSelect = (
+    listingType: ListingTypeFilter,
+    category: string | null
+  ) => {
+    setListingType(listingType);
+    setCategory(category);
     onCategorySelect?.();
   };
 
@@ -100,22 +130,15 @@ export function CategoryBar({ onCategorySelect }: CategoryBarProps) {
     <section className="border-y border-slate-200/80 bg-white" aria-label="Categorias">
       <div className="page-container py-3 lg:py-3.5">
         <div className="scrollbar-hide snap-x-mandatory flex justify-center gap-5 overflow-x-auto pb-0.5 sm:gap-7">
-          {DESKTOP_FILTERS.map((item) => {
-            const isActive =
-              item.category === null
-                ? filters.category === null && filters.listingType === null
-                : filters.category === item.category;
-
-            return (
-              <FilterChip
-                key={item.id}
-                label={item.label}
-                iconKey={item.iconKey}
-                isActive={isActive}
-                onSelect={() => handleSelect(item.category)}
-              />
-            );
-          })}
+          {DESKTOP_FILTERS.map((item) => (
+            <FilterChip
+              key={item.id}
+              label={item.label}
+              iconKey={item.iconKey}
+              isActive={activeId === item.id}
+              onSelect={() => handleSelect(item.listingType, item.category)}
+            />
+          ))}
         </div>
       </div>
     </section>

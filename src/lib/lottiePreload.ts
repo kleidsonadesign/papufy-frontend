@@ -2,7 +2,7 @@ import { LOTTIE_SRC } from "./lottieSrc";
 import type { LottieIconName } from "../components/icons/lottieTypes";
 
 export function getLordIconScale(_name?: LottieIconName): number {
-  return 1.1;
+  return 1;
 }
 
 const CATEGORY_LOTTIE_URLS = Array.from(
