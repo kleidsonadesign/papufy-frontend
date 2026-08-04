@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FadeContent } from "@/components/effects/FadeContent";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MobileShell } from "../components/mobile/MobileShell";
+import { AutoAnimateList } from "../components/motion/AutoAnimateList";
+import { MotionEnter } from "../components/motion/MotionPrimitives";
 import { useChat } from "../context/ChatContext";
 import type { ConversationSummary } from "../types";
 import { formatRelativeTime } from "../utils/format";
@@ -35,7 +36,7 @@ export function NotificationsPage() {
   return (
     <MobileShell>
       <div className="mobile-gutter space-y-4 py-4">
-        <FadeContent>
+        <MotionEnter>
           <header>
             <h1 className="text-lg font-bold text-foreground">Notificações</h1>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -44,7 +45,7 @@ export function NotificationsPage() {
                 : "Você está em dia"}
             </p>
           </header>
-        </FadeContent>
+        </MotionEnter>
 
         {loading && (
           <div className="space-y-2">
@@ -82,33 +83,37 @@ export function NotificationsPage() {
           )}
 
         {!loading && unreadConversations.length > 0 && (
-          <section>
-            <h2 className="mb-2 text-xs font-bold uppercase tracking-wide text-sky-600">
-              Novas
-            </h2>
-            <ul className="space-y-2">
-              {unreadConversations.map((c) => (
-                <li key={c.id}>
-                  <NotificationItem conversation={c} />
-                </li>
-              ))}
-            </ul>
-          </section>
+          <MotionEnter delay={40}>
+            <section>
+              <h2 className="mb-2 text-xs font-bold uppercase tracking-wide text-sky-600">
+                Novas
+              </h2>
+              <AutoAnimateList as="ul" className="space-y-2">
+                {unreadConversations.map((c) => (
+                  <li key={c.id}>
+                    <NotificationItem conversation={c} />
+                  </li>
+                ))}
+              </AutoAnimateList>
+            </section>
+          </MotionEnter>
         )}
 
         {!loading && readConversations.length > 0 && (
-          <section>
-            <h2 className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
-              Anteriores
-            </h2>
-            <ul className="space-y-2">
-              {readConversations.map((c) => (
-                <li key={c.id}>
-                  <NotificationItem conversation={c} />
-                </li>
-              ))}
-            </ul>
-          </section>
+          <MotionEnter delay={80}>
+            <section>
+              <h2 className="mb-2 text-xs font-bold uppercase tracking-wide text-muted-foreground">
+                Anteriores
+              </h2>
+              <AutoAnimateList as="ul" className="space-y-2">
+                {readConversations.map((c) => (
+                  <li key={c.id}>
+                    <NotificationItem conversation={c} />
+                  </li>
+                ))}
+              </AutoAnimateList>
+            </section>
+          </MotionEnter>
         )}
       </div>
     </MobileShell>

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { FadeContent } from "@/components/effects/FadeContent";
 import { ShineBorder } from "@/components/effects/ShineBorder";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MobileShell } from "../components/mobile/MobileShell";
+import { AutoAnimateList } from "../components/motion/AutoAnimateList";
+import { MotionEnter } from "../components/motion/MotionPrimitives";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
@@ -191,14 +192,16 @@ export function WalletPage() {
   return (
     <MobileShell>
       <div className="mx-auto w-full max-w-3xl space-y-4 p-4 pb-8">
-        <header>
-          <h1 className="text-xl font-bold text-slate-900">Carteira</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            Saldo na subconta Asaas, saque Pix e histórico de pagamentos
-          </p>
-        </header>
+        <MotionEnter>
+          <header>
+            <h1 className="text-xl font-bold text-slate-900">Carteira</h1>
+            <p className="mt-1 text-sm text-slate-500">
+              Saldo na subconta Asaas, saque Pix e histórico de pagamentos
+            </p>
+          </header>
+        </MotionEnter>
 
-        <FadeContent>
+        <MotionEnter delay={40}>
         <ShineBorder borderRadius="1rem">
         <Card className="border-0 bg-gradient-to-br from-sky-50 to-blue-50 py-0 shadow-sm ring-0">
           <CardContent className="p-5">
@@ -292,9 +295,10 @@ export function WalletPage() {
           </CardContent>
         </Card>
         </ShineBorder>
-        </FadeContent>
+        </MotionEnter>
 
         {showWithdrawForm && (
+          <MotionEnter>
           <form onSubmit={handleSubaccountWithdraw}>
           <Card className="py-0 shadow-sm">
             <CardContent className="space-y-3 p-4">
@@ -340,6 +344,7 @@ export function WalletPage() {
             </CardContent>
           </Card>
           </form>
+          </MotionEnter>
         )}
 
         <div className="flex gap-2 rounded-xl bg-slate-100 p-1">
@@ -378,7 +383,7 @@ export function WalletPage() {
             Nenhum lançamento nesta aba.
           </p>
         ) : (
-          <ul className="space-y-3">
+          <AutoAnimateList as="ul" className="space-y-3">
             {filtered.map((tx) => {
               const isPro = tx.professionalId === user.id;
               return (
@@ -420,7 +425,7 @@ export function WalletPage() {
                 </li>
               );
             })}
-          </ul>
+          </AutoAnimateList>
         )}
       </div>
     </MobileShell>

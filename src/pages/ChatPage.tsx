@@ -1,11 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "../components/Layout";
 import { SafeText } from "../components/SafeText";
 import { TransactionReviewPanel } from "../components/chat/TransactionReviewPanel";
 import { PaymentCheckoutSheet } from "../components/mobile/PaymentCheckoutSheet";
 import { IconChevronLeft, IconPaperclip } from "../components/icons/NavIcons";
+import { AutoAnimateList } from "../components/motion/AutoAnimateList";
+import {
+  MotionEnter,
+  MotionMessageBubble,
+  MotionPressButton,
+  MotionSheetPanel,
+} from "../components/motion/MotionPrimitives";
 import { useAuth } from "../context/AuthContext";
 import { useChat } from "../context/ChatContext";
 import { useToast } from "../context/ToastContext";
@@ -220,7 +228,10 @@ export function ChatPage() {
   }, [activeId, onMessage, loadConversations, user?.id]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const id = window.setTimeout(() => {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, 80);
+    return () => window.clearTimeout(id);
   }, [messages]);
 
   useEffect(() => {
@@ -582,7 +593,7 @@ export function ChatPage() {
 
   return (
     <Layout showCategories={false}>
-      <div className="page-container flex min-h-[calc(100dvh-8rem)] flex-col py-3 sm:py-4 lg:min-h-[calc(100vh-180px)] lg:flex-row lg:gap-4 lg:py-6">
+      <MotionEnter className="page-container flex min-h-[calc(100dvh-8rem)] flex-col py-3 sm:py-4 lg:min-h-[calc(100vh-180px)] lg:flex-row lg:gap-4 lg:py-6">
         <aside
           className={`flex w-full flex-col rounded-2xl border border-papufy-border bg-white lg:max-h-[calc(100vh-12rem)] lg:w-80 ${
             showListOnMobile ? "min-h-[50dvh] flex-1" : "hidden lg:flex"
@@ -601,7 +612,10 @@ export function ChatPage() {
             </p>
           </div>
 
-          <div className="flex-1 overflow-y-auto overscroll-contain">
+          <AutoAnimateList
+            duration={220}
+            className="flex-1 overflow-y-auto overscroll-contain"
+          >
             {loadingList && (
               <p className="p-4 text-sm text-papufy-muted">Carregando...</p>
             )}
@@ -613,7 +627,7 @@ export function ChatPage() {
                 <Link
                   key={c.id}
                   to={`/chat/${c.id}`}
-                  className={`touch-target block border-b border-papufy-border px-4 py-4 transition active:bg-sky-50 lg:py-3 lg:hover:bg-sky-50 ${
+                  className={`touch-target block border-b border-papufy-border px-4 py-4 transition active:scale-[0.99] active:bg-sky-50 lg:py-3 lg:hover:bg-sky-50 ${
                     activeId === c.id ? "bg-sky-50" : ""
                   }`}
                 >
@@ -622,9 +636,13 @@ export function ChatPage() {
                       {c.otherUser.nome}
                     </p>
                     {c.unread > 0 && (
-                      <span className="shrink-0 rounded-full bg-sky-500 px-2 py-0.5 text-[10px] font-bold text-white">
+                      <motion.span
+                        initial={{ scale: 0.6, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="shrink-0 rounded-full bg-sky-500 px-2 py-0.5 text-[10px] font-bold text-white"
+                      >
                         {c.unread}
-                      </span>
+                      </motion.span>
                     )}
                   </div>
                   <p className="line-clamp-1 text-xs text-papufy-muted">
@@ -654,7 +672,7 @@ export function ChatPage() {
                 </Link>
               </div>
             )}
-          </div>
+          </AutoAnimateList>
         </aside>
 
         <section
@@ -669,14 +687,14 @@ export function ChatPage() {
           ) : (
             <>
               <div className="flex items-center gap-2 border-b border-papufy-border px-3 py-3 sm:px-4">
-                <button
+                <MotionPressButton
                   type="button"
                   onClick={() => navigate("/chat")}
                   className="touch-target -ml-1 rounded-full p-2 text-papufy-muted hover:bg-gray-50 lg:hidden"
                   aria-label="Voltar às conversas"
                 >
                   <IconChevronLeft />
-                </button>
+                </MotionPressButton>
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-bold text-papufy-text">
                     {activeConversation?.otherUser.nome ?? "Conversa"}
@@ -696,25 +714,25 @@ export function ChatPage() {
                   </Button>
                 )}
                 {canReportProblem && (
-                  <button
+                  <MotionPressButton
                     type="button"
                     onClick={() => setReportOpen(true)}
-                    className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 transition active:scale-95"
+                    className="rounded-xl border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700"
                   >
                     Reportar Problema
-                  </button>
+                  </MotionPressButton>
                 )}
               </div>
 
-              <div className="flex-1 space-y-3 overflow-y-auto overscroll-contain p-4">
+              <AutoAnimateList
+                duration={220}
+                className="flex-1 space-y-3 overflow-y-auto overscroll-contain p-4"
+              >
                 {loadingMessages && (
                   <p className="text-sm text-papufy-muted">Carregando mensagens...</p>
                 )}
                 {messages.map((m) => (
-                  <div
-                    key={m.id}
-                    className={`flex ${m.isMine ? "justify-end" : "justify-start"}`}
-                  >
+                  <MotionMessageBubble key={m.id} isMine={m.isMine}>
                     {m.type === "PROPOSAL" ? (
                       <div className="w-full max-w-xs rounded-2xl border border-sky-100 bg-sky-50/50 p-4 text-slate-800 shadow-sm">
                         <p className="text-xs font-semibold text-sky-700">
@@ -763,7 +781,7 @@ export function ChatPage() {
                             </p>
                             {m.transactionId &&
                               transactionsById[m.transactionId]?.status === "PAID" && (
-                                <button
+                                <MotionPressButton
                                   type="button"
                                   onClick={() => void confirmCompletion(m.transactionId!)}
                                   disabled={confirmingTxId === m.transactionId}
@@ -772,7 +790,7 @@ export function ChatPage() {
                                   {confirmingTxId === m.transactionId
                                     ? "Confirmando..."
                                     : "Confirmar serviço concluído"}
-                                </button>
+                                </MotionPressButton>
                               )}
                             {m.transactionId &&
                               activeConversation?.myRole === "contractor" &&
@@ -836,18 +854,20 @@ export function ChatPage() {
                         <SafeText as="span">{m.content}</SafeText>
                       </div>
                     )}
-                  </div>
+                  </MotionMessageBubble>
                 ))}
                 <div ref={bottomRef} />
-              </div>
+              </AutoAnimateList>
 
               {policyWarning && (
-                <div
+                <motion.div
                   role="alert"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
                   className="mx-3 mb-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-900"
                 >
                   {policyWarning}
-                </div>
+                </motion.div>
               )}
 
               <form
@@ -863,7 +883,7 @@ export function ChatPage() {
                     disabled={uploadingImage}
                     onChange={(e) => void handleImagePick(e.target.files?.[0])}
                   />
-                  <button
+                  <MotionPressButton
                     type="button"
                     disabled={uploadingImage}
                     onClick={() => imageInputRef.current?.click()}
@@ -876,7 +896,7 @@ export function ChatPage() {
                     ) : (
                       <IconPaperclip className="h-5 w-5" />
                     )}
-                  </button>
+                  </MotionPressButton>
                   <input
                     value={draft}
                     onChange={(e) => handleDraftChange(e.target.value)}
@@ -902,7 +922,7 @@ export function ChatPage() {
             </>
           )}
         </section>
-      </div>
+      </MotionEnter>
       <PaymentCheckoutSheet
         open={checkoutOpen}
         onClose={() => setCheckoutOpen(false)}
@@ -932,126 +952,142 @@ export function ChatPage() {
               : undefined
         }
       />
-      {proposalModalOpen && (
-        <div className="fixed inset-0 z-[90] bg-black/40 p-4">
-          <div className="mx-auto mt-24 w-full max-w-sm rounded-2xl border border-sky-100 bg-white p-4 shadow-xl">
-            <h3 className="text-base font-bold text-slate-900">Enviar Proposta</h3>
-            <p className="mt-1 text-xs text-slate-500">
-              Informe o valor fixo combinado para este serviço.
-            </p>
-            <input
-              type="number"
-              min={1}
-              value={proposalValue}
-              onChange={(e) => setProposalValue(e.target.value)}
-              className="mt-3 w-full rounded-xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
-              placeholder="Ex: 180"
-            />
-            {needsReceiverPhone && (
-              <>
-                <p className="mt-3 text-xs text-sky-700">
-                  Primeiro recebimento: informe seu telefone para ativar sua conta
-                  de pagamento.
-                </p>
-                <input
-                  type="tel"
-                  value={proposalReceiverPhone}
-                  onChange={(e) => setProposalReceiverPhone(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
-                  placeholder="Telefone com DDD"
-                />
-              </>
-            )}
-            {needsReceiverBirthDate && (
-              <>
-                <p className="mt-3 text-xs text-sky-700">
-                  Informe sua data de nascimento (exigência do Asaas para receber
-                  pagamentos).
-                </p>
-                <input
-                  type="date"
-                  value={proposalBirthDate}
-                  onChange={(e) => setProposalBirthDate(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
-                />
-              </>
-            )}
-            <div className="mt-4 flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                onClick={() => setProposalModalOpen(false)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="button"
-                variant="papufy"
-                className="flex-1"
-                disabled={
-                  !proposalValue ||
-                  sendingProposal ||
-                  (needsReceiverPhone &&
-                    proposalReceiverPhone.replace(/\D/g, "").length < 10) ||
-                  (needsReceiverBirthDate && !proposalBirthDate)
-                }
-                onClick={() => void submitProposal()}
-              >
-                {sendingProposal ? "Enviando..." : "Confirmar"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-      {reportOpen && (
-        <div className="fixed inset-0 z-[95] flex flex-col justify-end bg-black/40">
-          <div className="rounded-t-3xl border border-sky-100 bg-white p-4 pb-6 shadow-xl">
-            <div className="mx-auto mb-3 h-1 w-12 rounded-full bg-slate-200" />
-            <h3 className="text-base font-bold text-slate-900">Reportar Problema</h3>
-            <p className="mt-2 rounded-xl border border-sky-200 bg-sky-50/40 px-3 py-2 text-xs text-sky-800">
-              Para agilizar a análise do suporte, é altamente recomendado que você
-              envie uma foto do serviço concluído como prova do seu trabalho.
-            </p>
-            <textarea
-              value={reportDescription}
-              onChange={(e) => setReportDescription(e.target.value)}
-              rows={4}
-              className="mt-3 w-full rounded-xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
-              placeholder="Descreva o problema com detalhes..."
-            />
-            <label className="mt-3 block rounded-xl border border-dashed border-sky-200 bg-sky-50/30 px-3 py-4 text-center text-xs font-semibold text-sky-700">
-              {reportFile ? reportFile.name : "Anexar foto (câmera ou galeria)"}
+      <AnimatePresence>
+        {proposalModalOpen && (
+          <motion.div
+            key="proposal-modal"
+            className="fixed inset-0 z-[90] bg-black/40 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <MotionSheetPanel className="mx-auto mt-24 w-full max-w-sm rounded-2xl border border-sky-100 bg-white p-4 shadow-xl">
+              <h3 className="text-base font-bold text-slate-900">Enviar Proposta</h3>
+              <p className="mt-1 text-xs text-slate-500">
+                Informe o valor fixo combinado para este serviço.
+              </p>
               <input
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="hidden"
-                onChange={(e) => setReportFile(e.target.files?.[0] ?? null)}
+                type="number"
+                min={1}
+                value={proposalValue}
+                onChange={(e) => setProposalValue(e.target.value)}
+                className="mt-3 w-full rounded-xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
+                placeholder="Ex: 180"
               />
-            </label>
-            <div className="mt-4 flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1"
-                onClick={() => setReportOpen(false)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="button"
-                variant="papufy"
-                className="flex-1"
-                disabled={reportSending || reportDescription.trim().length < 10}
-                onClick={() => void submitReport()}
-              >
-                {reportSending ? "Enviando..." : "Enviar para o Suporte"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+              {needsReceiverPhone && (
+                <>
+                  <p className="mt-3 text-xs text-sky-700">
+                    Primeiro recebimento: informe seu telefone para ativar sua conta
+                    de pagamento.
+                  </p>
+                  <input
+                    type="tel"
+                    value={proposalReceiverPhone}
+                    onChange={(e) => setProposalReceiverPhone(e.target.value)}
+                    className="mt-2 w-full rounded-xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
+                    placeholder="Telefone com DDD"
+                  />
+                </>
+              )}
+              {needsReceiverBirthDate && (
+                <>
+                  <p className="mt-3 text-xs text-sky-700">
+                    Informe sua data de nascimento (exigência do Asaas para receber
+                    pagamentos).
+                  </p>
+                  <input
+                    type="date"
+                    value={proposalBirthDate}
+                    onChange={(e) => setProposalBirthDate(e.target.value)}
+                    className="mt-2 w-full rounded-xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
+                  />
+                </>
+              )}
+              <div className="mt-4 flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setProposalModalOpen(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="button"
+                  variant="papufy"
+                  className="flex-1"
+                  disabled={
+                    !proposalValue ||
+                    sendingProposal ||
+                    (needsReceiverPhone &&
+                      proposalReceiverPhone.replace(/\D/g, "").length < 10) ||
+                    (needsReceiverBirthDate && !proposalBirthDate)
+                  }
+                  onClick={() => void submitProposal()}
+                >
+                  {sendingProposal ? "Enviando..." : "Confirmar"}
+                </Button>
+              </div>
+            </MotionSheetPanel>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {reportOpen && (
+          <motion.div
+            key="report-modal"
+            className="fixed inset-0 z-[95] flex flex-col justify-end bg-black/40"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <MotionSheetPanel className="rounded-t-3xl border border-sky-100 bg-white p-4 pb-6 shadow-xl">
+              <div className="mx-auto mb-3 h-1 w-12 rounded-full bg-slate-200" />
+              <h3 className="text-base font-bold text-slate-900">Reportar Problema</h3>
+              <p className="mt-2 rounded-xl border border-sky-200 bg-sky-50/40 px-3 py-2 text-xs text-sky-800">
+                Para agilizar a análise do suporte, é altamente recomendado que você
+                envie uma foto do serviço concluído como prova do seu trabalho.
+              </p>
+              <textarea
+                value={reportDescription}
+                onChange={(e) => setReportDescription(e.target.value)}
+                rows={4}
+                className="mt-3 w-full rounded-xl border border-sky-200 px-3 py-2.5 text-sm outline-none focus:border-sky-400"
+                placeholder="Descreva o problema com detalhes..."
+              />
+              <label className="mt-3 block rounded-xl border border-dashed border-sky-200 bg-sky-50/30 px-3 py-4 text-center text-xs font-semibold text-sky-700">
+                {reportFile ? reportFile.name : "Anexar foto (câmera ou galeria)"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={(e) => setReportFile(e.target.files?.[0] ?? null)}
+                />
+              </label>
+              <div className="mt-4 flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => setReportOpen(false)}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  type="button"
+                  variant="papufy"
+                  className="flex-1"
+                  disabled={reportSending || reportDescription.trim().length < 10}
+                  onClick={() => void submitReport()}
+                >
+                  {reportSending ? "Enviando..." : "Enviar para o Suporte"}
+                </Button>
+              </div>
+            </MotionSheetPanel>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Layout>
   );
 }

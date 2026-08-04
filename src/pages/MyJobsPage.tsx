@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FadeContent } from "@/components/effects/FadeContent";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MobileShell } from "../components/mobile/MobileShell";
+import { AutoAnimateList } from "../components/motion/AutoAnimateList";
+import { MotionEnter } from "../components/motion/MotionPrimitives";
 import { StatusBadge } from "../components/StatusBadge";
 import { useToast } from "../context/ToastContext";
 import { api } from "../lib/api";
@@ -70,7 +71,7 @@ export function MyJobsPage() {
   return (
     <MobileShell>
       <div className="mobile-gutter space-y-4 py-5">
-        <FadeContent>
+        <MotionEnter>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h1 className="text-xl font-extrabold text-foreground">
@@ -84,7 +85,7 @@ export function MyJobsPage() {
               <Link to="/anunciar/tipo">+ Novo anúncio</Link>
             </Button>
           </div>
-        </FadeContent>
+        </MotionEnter>
 
         {loading && (
           <div className="space-y-3">
@@ -107,7 +108,7 @@ export function MyJobsPage() {
           </Card>
         )}
 
-        <div className="space-y-3">
+        <AutoAnimateList className="space-y-3">
           {listings.map((listing) => {
             const isBico = listing.listingType === "JOB_VACANCY";
 
@@ -183,7 +184,7 @@ export function MyJobsPage() {
               </Card>
             );
           })}
-        </div>
+        </AutoAnimateList>
       </div>
     </MobileShell>
   );

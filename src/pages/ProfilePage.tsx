@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { FadeContent } from "@/components/effects/FadeContent";
+import { MotionEnter } from "../components/motion/MotionPrimitives";
 import { ShineBorder } from "@/components/effects/ShineBorder";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -186,14 +186,14 @@ export function ProfilePage() {
   return (
     <Layout showCategories={false}>
       <div className="page-container mx-auto max-w-lg space-y-6 py-5 sm:py-8">
-        <div>
+        <MotionEnter>
           <h1 className="text-xl font-extrabold text-papufy-text sm:text-2xl">
             Configurações
           </h1>
           <p className="mt-1 text-sm text-papufy-muted">
             {user?.email} · Currículo e certificados pelo celular
           </p>
-        </div>
+        </MotionEnter>
 
         {reputation && (
           <ReputationBlock
@@ -202,7 +202,7 @@ export function ProfilePage() {
           />
         )}
 
-        <FadeContent>
+        <MotionEnter delay={40}>
         <ShineBorder borderRadius="1rem">
         <Card className="border-0 bg-gradient-to-br from-card to-sky-50/80 py-0 shadow-none ring-0">
           <CardContent className="p-4 sm:p-5">
@@ -216,7 +216,7 @@ export function ProfilePage() {
           </CardContent>
         </Card>
         </ShineBorder>
-        </FadeContent>
+        </MotionEnter>
 
         <Card className="py-0 shadow-sm">
           <CardContent className="space-y-4 p-4 sm:p-6">

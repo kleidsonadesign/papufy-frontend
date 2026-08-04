@@ -1,7 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { FadeContent } from "@/components/effects/FadeContent";
 import { Card, CardContent } from "@/components/ui/card";
 import { MobileShell } from "../components/mobile/MobileShell";
+import {
+  MotionEnter,
+  MotionPressButton,
+} from "../components/motion/MotionPrimitives";
 import { ProtectedRoute } from "../components/ProtectedRoute";
 import type { ListingType } from "../types";
 
@@ -15,20 +18,20 @@ function AnunciarTipoContent() {
   return (
     <MobileShell>
       <div className="page-container space-y-4 py-6">
-        <FadeContent>
+        <MotionEnter>
           <h1 className="text-xl font-extrabold text-foreground">
             Anunciar Grátis
           </h1>
           <p className="text-sm text-muted-foreground">
             Escolha o que você quer publicar. São só 2 etapas rápidas.
           </p>
-        </FadeContent>
+        </MotionEnter>
 
-        <FadeContent delay={60}>
-          <button
+        <MotionEnter delay={60}>
+          <MotionPressButton
             type="button"
             onClick={() => go("JOB_VACANCY")}
-            className="block w-full text-left active:scale-[0.98]"
+            className="block w-full text-left"
           >
             <Card className="border-2 border-sky-200 bg-sky-50/80 py-0 shadow-sm ring-0 transition hover:shadow-md">
               <CardContent className="flex flex-col items-start gap-3 p-6">
@@ -41,14 +44,14 @@ function AnunciarTipoContent() {
                 </span>
               </CardContent>
             </Card>
-          </button>
-        </FadeContent>
+          </MotionPressButton>
+        </MotionEnter>
 
-        <FadeContent delay={120}>
-          <button
+        <MotionEnter delay={120}>
+          <MotionPressButton
             type="button"
             onClick={() => go("PROFESSIONAL_PROFILE")}
-            className="block w-full text-left active:scale-[0.98]"
+            className="block w-full text-left"
           >
             <Card className="border-2 border-blue-200 bg-blue-50/80 py-0 shadow-sm ring-0 transition hover:shadow-md">
               <CardContent className="flex flex-col items-start gap-3 p-6">
@@ -61,8 +64,8 @@ function AnunciarTipoContent() {
                 </span>
               </CardContent>
             </Card>
-          </button>
-        </FadeContent>
+          </MotionPressButton>
+        </MotionEnter>
       </div>
     </MobileShell>
   );

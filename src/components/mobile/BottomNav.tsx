@@ -1,13 +1,18 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { AnimatePresence, motion } from "motion/react";
 import { useAuth } from "../../context/AuthContext";
 import { useChat } from "../../context/ChatContext";
 import {
-  IconChat,
+  AnimatedLordIcon,
+  useLordPlay,
+} from "../icons/AnimatedLordIcon";
+import {
   IconHome,
   IconPlus,
   IconSearch,
   IconUser,
 } from "../icons/NavIcons";
+import { MotionPressButton } from "../motion/MotionPrimitives";
 
 const HIDDEN = ["/entrar"];
 
@@ -16,6 +21,7 @@ export function BottomNav() {
   const { isAuthenticated } = useAuth();
   const { unreadCount } = useChat();
   const navigate = useNavigate();
+  const { playToken: chatPlay, trigger: triggerChat } = useLordPlay();
 
   if (HIDDEN.some((p) => pathname.startsWith(p))) return null;
 
@@ -25,7 +31,7 @@ export function BottomNav() {
       : pathname === path || pathname.startsWith(`${path}/`);
 
   const itemClass = (active: boolean) =>
-    `touch-target flex min-w-0 flex-1 flex-col items-center justify-end gap-0.5 select-none px-0.5 pb-0.5 text-[10px] font-semibold leading-tight transition active:scale-95 ${
+    `touch-target flex min-w-0 flex-1 flex-col items-center justify-end gap-0.5 select-none px-0.5 pb-0.5 text-[10px] font-semibold leading-tight ${
       active ? "text-sky-500" : "text-papufy-muted"
     }`;
 
@@ -38,6 +44,7 @@ export function BottomNav() {
   };
 
   const handleChat = () => {
+    triggerChat();
     if (!isAuthenticated) {
       navigate("/entrar", { state: { redirect: "/chat" } });
       return;
@@ -59,25 +66,29 @@ export function BottomNav() {
       aria-label="Menu principal"
     >
       <div className="mx-auto flex h-[4.25rem] max-w-lg items-end justify-between px-1 pt-2">
-        <Link to="/" className={itemClass(isActive("/"))}>
-          <IconHome className="h-6 w-6" />
-          <span>Início</span>
-        </Link>
+        <motion.div whileTap={{ scale: 0.94 }} className="flex min-w-0 flex-1">
+          <Link to="/" className={itemClass(isActive("/"))}>
+            <IconHome className="h-6 w-6" />
+            <span>Início</span>
+          </Link>
+        </motion.div>
 
-        <Link
-          to="/buscar"
-          className={itemClass(isActive("/buscar"))}
-          aria-label="Buscar"
-        >
-          <IconSearch className="h-6 w-6" />
-          <span>Buscar</span>
-        </Link>
+        <motion.div whileTap={{ scale: 0.94 }} className="flex min-w-0 flex-1">
+          <Link
+            to="/buscar"
+            className={itemClass(isActive("/buscar"))}
+            aria-label="Buscar"
+          >
+            <IconSearch className="h-6 w-6" />
+            <span>Buscar</span>
+          </Link>
+        </motion.div>
 
         <div className="flex w-14 shrink-0 flex-col items-center justify-end self-stretch">
-          <button
+          <MotionPressButton
             type="button"
             onClick={handleAnunciar}
-            className="touch-target -mt-3 flex flex-col items-center gap-0.5 active:scale-95"
+            className="touch-target -mt-3 flex flex-col items-center gap-0.5"
             aria-label="Anunciar"
           >
             <span className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-blue-500 text-white shadow-md shadow-sky-200/50 ring-4 ring-white">
@@ -86,10 +97,10 @@ export function BottomNav() {
             <span className="text-[10px] font-bold leading-none text-sky-600">
               Anunciar
             </span>
-          </button>
+          </MotionPressButton>
         </div>
 
-        <button
+        <MotionPressButton
           type="button"
           onClick={handleChat}
           className={`${itemClass(isActive("/chat"))} relative`}
@@ -99,16 +110,38 @@ export function BottomNav() {
               : "Chat"
           }
         >
-          <IconChat className="h-6 w-6" />
-          {isAuthenticated && unreadCount > 0 && (
-            <span className="absolute right-1 top-0 flex h-4 min-w-4 items-center justify-center rounded-full bg-sky-500 px-1 text-[9px] font-bold text-white">
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </span>
-          )}
+          <span className="relative flex h-6 w-6 items-center justify-center">
+            <AnimatedLordIcon
+              name="chat"
+              fill
+              scale={1}
+              playToken={chatPlay}
+              colors={
+                isActive("/chat")
+                  ? "primary:#0ea5e9,secondary:#38bdf8"
+                  : "primary:#64748b,secondary:#94a3b8"
+              }
+              className="h-6 w-6"
+            />
+            <AnimatePresence>
+              {isAuthenticated && unreadCount > 0 && (
+                <motion.span
+                  key="unread"
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.5, opacity: 0 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 22 }}
+                  className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-sky-500 px-1 text-[9px] font-bold text-white"
+                >
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </span>
           <span>Chat</span>
-        </button>
+        </MotionPressButton>
 
-        <button
+        <MotionPressButton
           type="button"
           onClick={handleProfile}
           className={itemClass(isActive("/perfil"))}
@@ -116,7 +149,7 @@ export function BottomNav() {
         >
           <IconUser className="h-6 w-6" />
           <span>Perfil</span>
-        </button>
+        </MotionPressButton>
       </div>
     </nav>
   );

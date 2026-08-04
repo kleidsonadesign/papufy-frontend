@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { Button } from "@/components/ui/button";
+import { MotionSheetPanel } from "../motion/MotionPrimitives";
 import { QrCodePlaceholder } from "../home/QrCodePlaceholder";
 
 export interface PaymentCardPayload {
@@ -216,28 +218,32 @@ export function PaymentCheckoutSheet({
   if (!open && !visible) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-[100] flex flex-col justify-end"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Pagamento seguro"
-    >
-      <button
-        type="button"
-        className={`absolute inset-0 bg-slate-900/50 transition-opacity duration-300 ${
-          open ? "opacity-100" : "opacity-0"
-        }`}
-        onClick={handleClose}
-        disabled={busy}
-        aria-label="Fechar"
-      />
+    <AnimatePresence>
+      {(open || visible) && (
+        <motion.div
+          key="payment-sheet"
+          className="fixed inset-0 z-[100] flex flex-col justify-end"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Pagamento seguro"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <motion.button
+            type="button"
+            className="absolute inset-0 bg-slate-900/50"
+            onClick={handleClose}
+            disabled={busy}
+            aria-label="Fechar"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: open ? 1 : 0 }}
+            exit={{ opacity: 0 }}
+          />
 
-      <div
-        className={`relative max-h-[92dvh] w-full overflow-y-auto rounded-t-3xl bg-white px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 shadow-2xl transition-transform duration-300 ease-out ${
-          open ? "translate-y-0" : "translate-y-full"
-        }`}
-      >
-        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200" />
+          <MotionSheetPanel className="relative max-h-[92dvh] w-full overflow-y-auto rounded-t-3xl bg-white px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 shadow-2xl">
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200" />
 
         <header className="mb-4 text-center">
           <h2 className="text-lg font-extrabold text-slate-900">{title}</h2>
@@ -499,7 +505,9 @@ export function PaymentCheckoutSheet({
             Fechar
           </button>
         </div>
-      </div>
-    </div>
+          </MotionSheetPanel>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
