@@ -11,7 +11,6 @@ import {
 } from "../icons/AnimatedLordIcon";
 import { CategoryIconShell } from "../CategoryIconShell";
 import { MotionPressButton } from "../motion/MotionPrimitives";
-import { getLordIconScale } from "../../lib/lottiePreload";
 
 function resolveActiveMacroId(filters: JobFilters): string {
   const match = MACRO_SCROLL_CATEGORIES.find((macro) => {
@@ -54,20 +53,20 @@ function MacroChip({
         trigger();
         onSelect();
       }}
-      className="group flex w-[4.5rem] shrink-0 flex-col items-center gap-2 outline-none"
+      className="group flex min-w-0 flex-1 flex-col items-center gap-1 outline-none"
       aria-pressed={isActive}
     >
-      <CategoryIconShell isActive={isActive} className="!h-11 !w-11 sm:!h-11 sm:!w-11">
+      <CategoryIconShell isActive={isActive} size="sm">
         <AnimatedLordIcon
           name={iconKey}
           fill
-          scale={getLordIconScale(iconKey)}
+          scale={1.05}
           playToken={playToken}
           className="h-full w-full"
         />
       </CategoryIconShell>
       <span
-        className={`line-clamp-2 w-full text-center text-[11px] leading-tight transition duration-300 ${
+        className={`line-clamp-2 w-full text-center text-[9px] leading-tight transition duration-300 xs:text-[10px] ${
           isActive
             ? "font-semibold text-sky-700"
             : "font-medium text-sky-600 group-hover:font-semibold group-hover:text-sky-700"
@@ -94,11 +93,8 @@ export function CategoryScroll({ onChange }: CategoryScrollProps) {
 
   return (
     <section aria-label="Categorias" className="border-y border-slate-200/80 bg-white">
-      <div
-        className="scrollbar-hide overflow-x-auto px-3 py-3 touch-pan-x"
-        style={{ WebkitOverflowScrolling: "touch" }}
-      >
-        <div className="mx-auto flex w-max min-w-full flex-nowrap justify-center gap-5 sm:gap-6">
+      <div className="px-2 py-2.5 sm:px-3 sm:py-3">
+        <div className="flex w-full items-start justify-between gap-0.5 sm:gap-1">
           {MACRO_SCROLL_CATEGORIES.map((item) => (
             <MacroChip
               key={item.id}
