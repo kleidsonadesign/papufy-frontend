@@ -4,6 +4,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { MobileShell } from "../components/mobile/MobileShell";
 import { SearchBar } from "../components/mobile/SearchBar";
 import { ListingCardMobile } from "../components/mobile/ListingCardMobile";
+import { AutoAnimateList } from "../components/motion/AutoAnimateList";
+import { MotionEnter } from "../components/motion/MotionPrimitives";
 import { useFilters } from "../context/FilterContext";
 import { useDebounce } from "../hooks/useDebounce";
 import { useInfiniteListings } from "../hooks/useInfiniteListings";
@@ -44,20 +46,22 @@ export function SearchPage() {
       <SearchBar autoFocusFullscreen />
 
       <div className="mobile-gutter space-y-4 py-4">
-        <FadeContent>
-          <header>
-            <h1 className="text-lg font-bold text-foreground">
-              {hasQuery ? "Busca" : "Na sua região"}
-            </h1>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {locationDetecting
-                ? "Detectando localização..."
-                : hasQuery
-                  ? `"${debouncedSearch}" em ${locationLabel}`
-                  : `Anúncios em ${locationLabel}`}
-            </p>
-          </header>
-        </FadeContent>
+        <MotionEnter>
+          <FadeContent>
+            <header>
+              <h1 className="text-lg font-bold text-foreground">
+                {hasQuery ? "Busca" : "Na sua região"}
+              </h1>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {locationDetecting
+                  ? "Detectando localização..."
+                  : hasQuery
+                    ? `"${debouncedSearch}" em ${locationLabel}`
+                    : `Anúncios em ${locationLabel}`}
+              </p>
+            </header>
+          </FadeContent>
+        </MotionEnter>
 
         {loading && (
           <div className="grid grid-cols-2 gap-2">
@@ -80,11 +84,11 @@ export function SearchPage() {
         )}
 
         {listings.length > 0 && (
-          <div className="grid grid-cols-2 gap-2">
+          <AutoAnimateList className="grid grid-cols-2 gap-2">
             {listings.map((listing) => (
               <ListingCardMobile key={listing.id} listing={listing} compact />
             ))}
-          </div>
+          </AutoAnimateList>
         )}
       </div>
     </MobileShell>

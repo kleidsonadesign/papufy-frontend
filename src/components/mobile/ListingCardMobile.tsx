@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card";
 import { getCategoryMeta } from "../../constants/categories";
 import type { Listing } from "../../types";
 import { formatPrice, formatRelativeTime } from "../../utils/format";
-import { IconHeart } from "../icons/NavIcons";
+import { AnimatedLordIcon, useLordPlay } from "../icons/AnimatedLordIcon";
+import { MotionPressButton } from "../motion/MotionPrimitives";
 
 const FAVORITES_KEY = "papufy_favorites";
 
@@ -40,18 +41,20 @@ export function ListingCardMobile({
   const [favorited, setFavorited] = useState(() =>
     loadFavorites().has(listing.id)
   );
+  const { playToken: heartPlay, trigger: triggerHeart } = useLordPlay();
 
   const toggleFavorite = useCallback(
     (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
+      triggerHeart();
       const next = loadFavorites();
       if (next.has(listing.id)) next.delete(listing.id);
       else next.add(listing.id);
       saveFavorites(next);
       setFavorited(next.has(listing.id));
     },
-    [listing.id]
+    [listing.id, triggerHeart]
   );
 
   const locationShort = `${listing.cidade}, ${listing.uf}`;
@@ -103,22 +106,20 @@ export function ListingCardMobile({
             </div>
           )}
 
-          <button
-            type="button"
+          <MotionPressButton
             onClick={toggleFavorite}
-            className={`absolute right-1.5 top-1.5 flex items-center justify-center rounded-full bg-card/95 shadow-md backdrop-blur-sm transition active:scale-90 ${
-              compact ? "h-6 w-6" : "right-2 top-2 h-9 w-9"
+            className={`absolute right-1.5 top-1.5 flex items-center justify-center rounded-full bg-card/95 shadow-md backdrop-blur-sm ${
+              compact ? "h-7 w-7" : "right-2 top-2 h-9 w-9"
             }`}
             aria-label={favorited ? "Remover dos favoritos" : "Salvar nos favoritos"}
           >
-            <IconHeart
-              className={`transition ${compact ? "h-3.5 w-3.5" : "h-5 w-5"} ${
-                favorited
-                  ? "fill-sky-500 stroke-sky-500"
-                  : "stroke-muted-foreground fill-transparent"
-              }`}
+            <AnimatedLordIcon
+              name="heart"
+              size={compact ? 18 : 22}
+              playToken={heartPlay}
+              className={favorited ? "opacity-100" : "opacity-80"}
             />
-          </button>
+          </MotionPressButton>
 
           <Badge
             className={`absolute max-w-[calc(100%-2.5rem)] rounded-md font-bold uppercase leading-tight tracking-wide shadow-sm ${

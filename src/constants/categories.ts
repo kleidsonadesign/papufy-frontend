@@ -190,7 +190,7 @@ export const MACRO_SCROLL_CATEGORIES = [
     id: "all",
     label: "Todos",
     icon: "✨",
-    iconKey: "grid" as CategoryIconKey,
+    iconKey: "todos" as CategoryIconKey,
     listingType: null as ListingTypeFilter,
     category: null as string | null,
   },

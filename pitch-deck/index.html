@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Papufy — Pitch Deck</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --brand: #0ea5e9;
+      --brand-deep: #0284c7;
+      --brand-soft: #e0f2fe;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --bg: #f8fbfe;
+      --white: #ffffff;
+      --ok: #0d9488;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: #0b1220;
+      color: var(--ink);
+      font-family: "Outfit", system-ui, sans-serif;
+      overflow: hidden;
+    }
+
+    .deck {
+      height: 100%;
+      position: relative;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      padding: clamp(1.5rem, 4vw, 3.5rem);
+      background:
+        radial-gradient(ellipse 80% 50% at 100% 0%, rgba(14, 165, 233, 0.12), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 0% 100%, rgba(2, 132, 199, 0.08), transparent 50%),
+        var(--bg);
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .slide.active { display: flex; }
+
+    .slide.cover {
+      background:
+        linear-gradient(145deg, #0c4a6e 0%, #0284c7 45%, #38bdf8 100%);
+      color: #fff;
+    }
+
+    .slide.dark {
+      background: #0f172a;
+      color: #f1f5f9;
+    }
+
+    .slide.dark .muted { color: #94a3b8; }
+    .slide.dark .card {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.12);
+    }
+
+    .eyebrow {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--brand-deep);
+      margin-bottom: 0.75rem;
+    }
+
+    .cover .eyebrow { color: rgba(255,255,255,0.75); }
+
+    h1 {
+      font-size: clamp(2.4rem, 6vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      max-width: 16ch;
+    }
+
+    h2 {
+      font-size: clamp(1.8rem, 4vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 1.25rem;
+      max-width: 22ch;
+    }
+
+    .tagline {
+      font-family: "Source Serif 4", Georgia, serif;
+      font-size: clamp(1.15rem, 2.5vw, 1.6rem);
+      font-weight: 500;
+      margin-top: 1rem;
+      opacity: 0.92;
+      max-width: 28ch;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.55;
+      max-width: 52ch;
+    }
+
+    .lead {
+      font-size: clamp(1.1rem, 2vw, 1.35rem);
+      line-height: 1.5;
+      max-width: 40ch;
+      margin-bottom: 1.75rem;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 800px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      h1 { max-width: none; }
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      padding: 1.15rem 1.25rem;
+    }
+
+    .card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+    }
+
+    .card p, .card li {
+      font-size: 0.95rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .card ul { padding-left: 1.1rem; }
+    .card li + li { margin-top: 0.25rem; }
+
+    .stat-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem 2.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--brand-deep);
+    }
+
+    .cover .stat strong { color: #fff; }
+    .dark .stat strong { color: #38bdf8; }
+
+    .stat span {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .cover .stat span { color: rgba(255,255,255,0.7); }
+    .dark .stat span { color: #94a3b8; }
+
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+      align-items: center;
+      margin-top: 1rem;
+    }
+
+    .flow .step {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.65rem 1.1rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .flow .arrow {
+      color: var(--brand);
+      font-weight: 700;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: 0.95rem;
+    }
+
+    .table th, .table td {
+      text-align: left;
+      padding: 0.75rem 0.5rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .table th {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .badge {
+      display: inline-block;
+      background: var(--brand-soft);
+      color: var(--brand-deep);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+    }
+
+    .footer-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.25rem;
+      background: rgba(15, 23, 42, 0.88);
+      color: #e2e8f0;
+      font-size: 0.8rem;
+      z-index: 20;
+      backdrop-filter: blur(8px);
+    }
+
+    .footer-bar button {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      border-radius: 0.5rem;
+      padding: 0.4rem 0.75rem;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.8rem;
+    }
+
+    .footer-bar button:hover { border-color: #38bdf8; }
+
+    .progress {
+      height: 3px;
+      background: rgba(255,255,255,0.15);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 30;
+    }
+
+    .progress > i {
+      display: block;
+      height: 100%;
+      background: #38bdf8;
+      width: 0%;
+      transition: width 0.25s ease;
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.04em;
+    }
+
+    .cover .logo { font-size: 1.5rem; margin-bottom: 2rem; }
+
+    .ask-box {
+      margin-top: 1.25rem;
+      padding: 1.25rem 1.5rem;
+      border-radius: 1rem;
+      background: linear-gradient(135deg, var(--brand-soft), #fff);
+      border: 1px solid #bae6fd;
+      max-width: 40rem;
+    }
+
+    .ask-box strong {
+      font-size: 1.5rem;
+      color: var(--brand-deep);
+    }
+
+    @media print {
+      html, body { overflow: visible; height: auto; background: #fff; }
+      .footer-bar, .progress { display: none !important; }
+      .slide {
+        position: relative;
+        display: flex !important;
+        page-break-after: always;
+        min-height: 100vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="progress"><i id="bar"></i></div>
+
+  <div class="deck" id="deck">
+
+    <!-- 1 COVER -->
+    <section class="slide cover active" data-title="Capa">
+      <div class="logo">Papufy</div>
+      <p class="eyebrow">Pitch deck · Marketplace de serviços</p>
+      <h1>Sua grana extra, rápida.</h1>
+      <p class="tagline">
+        Conectamos quem precisa de um serviço a quem sabe fazer — com pagamento seguro no app.
+      </p>
+      <div class="stat-row" style="margin-top: 2.5rem;">
+        <div class="stat"><strong>7%</strong><span>taxa só no pagamento in-app</span></div>
+        <div class="stat"><strong>2 lados</strong><span>pedidos + profissionais</span></div>
+        <div class="stat"><strong>Pix + cartão</strong><span>via Asaas</span></div>
+      </div>
+    </section>
+
+    <!-- 2 PROBLEM -->
+    <section class="slide" data-title="Problema">
+      <p class="eyebrow">Problema</p>
+      <h2>Serviços locais ainda rodam no improviso.</h2>
+      <p class="lead muted">
+        Quem precisa de pintor, mecânico ou diarista depende de indicação, grupo de WhatsApp e pagamento na confiança. Quem presta serviço perde tempo caçando cliente e risco de calote.
+      </p>
+      <div class="grid-3">
+        <div class="card">
+          <h3>Demanda dispersa</h3>
+          <p>Pedidos espalhados em redes sociais, sem padrão e sem histórico.</p>
+        </div>
+        <div class="card">
+          <h3>Oferta invisível</h3>
+          <p>Profissionais bons não aparecem além do boca a boca do bairro.</p>
+        </div>
+        <div class="card">
+          <h3>Dinheiro inseguro</h3>
+          <p>Acordo verbal, Pix direto, disputa sem mediação nem comprovante.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 SOLUTION -->
+    <section class="slide" data-title="Solução">
+      <p class="eyebrow">Solução</p>
+      <h2>Marketplace local com confiança e cash-out.</h2>
+      <p class="lead muted">
+        Papufy é o lugar onde o pedido encontra o profissional certo, o chat fecha o acordo e o pagamento acontece no app — com liberação após confirmação das duas partes.
+      </p>
+      <div class="grid-2">
+        <div class="card">
+          <span class="badge">Contratante</span>
+          <h3>Preciso de um serviço</h3>
+          <ul>
+            <li>Publica o pedido em minutos</li>
+            <li>Recebe propostas no chat</li>
+            <li>Paga com Pix ou cartão</li>
+            <li>Confirma a conclusão do serviço</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="badge">Profissional</span>
+          <h3>Ofereço um serviço</h3>
+          <ul>
+            <li>Anuncia perfil e aptidões</li>
+            <li>Negocia por chat / proposta</li>
+            <li>Recebe 93% via split</li>
+            <li>Saca para o Pix quando liberado</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4 PRODUCT -->
+    <section class="slide" data-title="Produto">
+      <p class="eyebrow">Produto</p>
+      <h2>Do anúncio ao saque, no mesmo app.</h2>
+      <div class="grid-3">
+        <div class="card">
+          <h3>Dois funis</h3>
+          <p><strong>Pedido</strong> (preciso) e <strong>perfil profissional</strong> (ofereço). Categorias de reformas, assistência, domésticos, aulas e mais.</p>
+        </div>
+        <div class="card">
+          <h3>Chat + proposta</h3>
+          <p>Negociação em tempo real, imagens e propostas com valor — caminho natural para o checkout.</p>
+        </div>
+        <div class="card">
+          <h3>Pagamento &amp; carteira</h3>
+          <p>Asaas (Pix/cartão), split 93/7, dupla confirmação e saque Pix controlado pela plataforma.</p>
+        </div>
+      </div>
+      <div class="stat-row">
+        <div class="stat"><strong>Anunciar grátis</strong><span>monetização só na transação</span></div>
+        <div class="stat"><strong>Mobile-first</strong><span>web app pronto para o dia a dia</span></div>
+      </div>
+    </section>
+
+    <!-- 5 HOW IT WORKS -->
+    <section class="slide" data-title="Como funciona">
+      <p class="eyebrow">Como funciona</p>
+      <h2>Ciclo curto, dinheiro com regra.</h2>
+      <div class="flow">
+        <span class="step">1. Anúncio</span>
+        <span class="arrow">→</span>
+        <span class="step">2. Match / chat</span>
+        <span class="arrow">→</span>
+        <span class="step">3. Pagamento</span>
+        <span class="arrow">→</span>
+        <span class="step">4. Serviço</span>
+        <span class="arrow">→</span>
+        <span class="step">5. Confirmação</span>
+        <span class="arrow">→</span>
+        <span class="step">6. Saque</span>
+      </div>
+      <div class="grid-2" style="margin-top: 1.75rem;">
+        <div class="card">
+          <h3>Por que o gate importa</h3>
+          <p>O valor só libera para saque depois que <strong>contratante e profissional</strong> confirmam. Menos calote, mais confiança para usar o app.</p>
+        </div>
+        <div class="card">
+          <h3>Take rate limpo</h3>
+          <p>Papufy cobra <strong>7%</strong> apenas em pagamentos feitos pelo app. Fora disso, anunciar continua grátis.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6 MARKET -->
+    <section class="slide" data-title="Mercado">
+      <p class="eyebrow">Mercado</p>
+      <h2>Autônomos movem a economia real da cidade.</h2>
+      <p class="lead muted">
+        Pintores, mecânicos, eletricistas, diaristas: renda média de conta própria no Brasil cerca de <strong>R$ 2,7 mil/mês (~R$ 32 mil/ano)</strong> (IBGE). O volume está no bairro — ainda pouco digitalizado.
+      </p>
+      <div class="grid-3">
+        <div class="card">
+          <h3>TAM</h3>
+          <p>Serviços locais e “bicos” no Brasil — dezenas de milhões de trabalhadores por conta própria.</p>
+        </div>
+        <div class="card">
+          <h3>SAM</h3>
+          <p>Cidades médias com densidade alta: começamos por <strong>Campina Grande – PB</strong> e expandimos cluster a cluster.</p>
+        </div>
+        <div class="card">
+          <h3>SOM</h3>
+          <p>Capturar o GMV que hoje fecha no WhatsApp, com pagamento e reputação no Papufy.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 BUSINESS MODEL -->
+    <section class="slide" data-title="Modelo">
+      <p class="eyebrow">Modelo de negócio</p>
+      <h2>Ganhamos quando o serviço acontece.</h2>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Receita</h3>
+          <ul>
+            <li><strong>7%</strong> sobre pagamentos in-app</li>
+            <li>Profissional recebe <strong>93%</strong> (split)</li>
+            <li>Anúncio e chat: <strong>grátis</strong></li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Unit economics (ilustrativo)</h3>
+          <ul>
+            <li>Job R$ 200 → Papufy R$ 14</li>
+            <li>Job R$ 500 → Papufy R$ 35</li>
+            <li>Escalável com densidade local</li>
+          </ul>
+        </div>
+      </div>
+      <p class="muted" style="margin-top: 1.25rem;">
+        Próximas alavancas: planos para profissionais, destaque de anúncios, B2B (condomínios / imobiliárias).
+      </p>
+    </section>
+
+    <!-- 8 TRACTION -->
+    <section class="slide" data-title="Tração">
+      <p class="eyebrow">Tração</p>
+      <h2>Produto vivo, receita em escala.</h2>
+      <div class="stat-row">
+        <div class="stat"><strong>R$ 4 mi</strong><span>faturamento anual (run-rate)</span></div>
+        <div class="stat"><strong>~R$ 333 mil</strong><span>média mensal</span></div>
+        <div class="stat"><strong>~R$ 57 mi</strong><span>GMV implícito @ 7%</span></div>
+      </div>
+      <div class="grid-2" style="margin-top: 1.75rem;">
+        <div class="card">
+          <h3>Já construído</h3>
+          <ul>
+            <li>App web mobile-first (React)</li>
+            <li>Backend + chat em tempo real</li>
+            <li>Pagamentos Asaas (Pix/cartão, carteira, saque)</li>
+            <li>Dupla confirmação e disputa</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Foco operacional</h3>
+          <ul>
+            <li>Liquidez em Campina Grande e região</li>
+            <li>Aumentar % de jobs pagos no app</li>
+            <li>Onboarding de profissionais verificados</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- 9 COMPETITION -->
+    <section class="slide" data-title="Competição">
+      <p class="eyebrow">Posicionamento</p>
+      <h2>Não somos classificados. Somos transação.</h2>
+      <table class="table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>WhatsApp / indicação</th>
+            <th>Classificados</th>
+            <th>Papufy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Match local</strong></td>
+            <td>Sim, caótico</td>
+            <td>Sim</td>
+            <td>Sim, estruturado</td>
+          </tr>
+          <tr>
+            <td><strong>Chat</strong></td>
+            <td>Sim</td>
+            <td>Limitado</td>
+            <td>Nativo + proposta</td>
+          </tr>
+          <tr>
+            <td><strong>Pagamento no app</strong></td>
+            <td>Não</td>
+            <td>Raro</td>
+            <td>Pix + cartão</td>
+          </tr>
+          <tr>
+            <td><strong>Proteção / liberação</strong></td>
+            <td>Não</td>
+            <td>Não</td>
+            <td>Dupla confirmação</td>
+          </tr>
+          <tr>
+            <td><strong>Monetização</strong></td>
+            <td>—</td>
+            <td>Lead / anúncio</td>
+            <td>Take rate 7%</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- 10 GTM -->
+    <section class="slide" data-title="Go-to-market">
+      <p class="eyebrow">Go-to-market</p>
+      <h2>Densidade primeiro. Escala depois.</h2>
+      <div class="grid-3">
+        <div class="card">
+          <h3>1. Supply</h3>
+          <p>Recrutar profissionais por categoria quente (reformas, assistência, domésticos) com anúncio grátis e saque claro.</p>
+        </div>
+        <div class="card">
+          <h3>2. Demand</h3>
+          <p>Aquisição local: redes, parcerias de bairro, SEO “serviço + cidade”, indicação.</p>
+        </div>
+        <div class="card">
+          <h3>3. Expand</h3>
+          <p>Replicar o playbook cidade a cidade no Nordeste e praças com mesmo perfil.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 11 VISION / ASK -->
+    <section class="slide" data-title="Visão">
+      <p class="eyebrow">Visão &amp; oportunidade</p>
+      <h2>A infraestrutura de trabalho local do Brasil.</h2>
+      <p class="lead muted">
+        Toda cidade tem oferta e demanda de serviço. Quase nenhuma tem o trilho completo: descoberta, acordo, pagamento e reputação.
+      </p>
+      <div class="ask-box">
+        <p class="eyebrow" style="margin-bottom: 0.35rem;">Valuation ilustrativo (venda 100%)</p>
+        <strong>R$ 28 – 40 milhões</strong>
+        <p class="muted" style="margin-top: 0.5rem; max-width: none;">
+          Com base em ~R$ 4 mi de faturamento anual (ARR) e múltiplos de marketplace early/growth no Brasil. Sujeito a due diligence.
+        </p>
+      </div>
+    </section>
+
+    <!-- 12 CLOSE -->
+    <section class="slide dark" data-title="Contato">
+      <p class="eyebrow" style="color: #38bdf8;">Papufy</p>
+      <h2 style="color: #fff;">Vamos tirar o serviço do improviso.</h2>
+      <p class="lead" style="color: #94a3b8;">
+        Marketplace local · pagamento seguro · grana extra rápida.
+      </p>
+      <div class="stat-row">
+        <div class="stat"><strong>papufy.com</strong><span>produto</span></div>
+        <div class="stat"><strong>7%</strong><span>take rate</span></div>
+        <div class="stat"><strong>R$ 4 mi</strong><span>faturamento (ARR)</span></div>
+      </div>
+      <p style="margin-top: 2.5rem; color: #64748b; font-size: 0.9rem;">
+        ← → ou clique em Anterior / Próximo · P para imprimir / PDF
+      </p>
+    </section>
+  </div>
+
+  <div class="footer-bar">
+    <button type="button" id="prev">← Anterior</button>
+    <span id="label">1 / 12 — Capa</span>
+    <button type="button" id="next">Próximo →</button>
+  </div>
+
+  <script>
+    const slides = [...document.querySelectorAll(".slide")];
+    const label = document.getElementById("label");
+    const bar = document.getElementById("bar");
+    let i = 0;
+
+    function show(n) {
+      i = Math.max(0, Math.min(slides.length - 1, n));
+      slides.forEach((s, idx) => s.classList.toggle("active", idx === i));
+      const title = slides[i].dataset.title || "";
+      label.textContent = `${i + 1} / ${slides.length} — ${title}`;
+      bar.style.width = `${((i + 1) / slides.length) * 100}%`;
+    }
+
+    document.getElementById("prev").onclick = () => show(i - 1);
+    document.getElementById("next").onclick = () => show(i + 1);
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight" || e.key === " " || e.key === "PageDown") {
+        e.preventDefault();
+        show(i + 1);
+      }
+      if (e.key === "ArrowLeft" || e.key === "PageUp") {
+        e.preventDefault();
+        show(i - 1);
+      }
+      if (e.key === "Home") show(0);
+      if (e.key === "End") show(slides.length - 1);
+      if (e.key.toLowerCase() === "p" && (e.ctrlKey || e.metaKey)) {
+        /* browser print */
+      }
+    });
+
+    show(0);
+  </script>
+</body>
+</html>

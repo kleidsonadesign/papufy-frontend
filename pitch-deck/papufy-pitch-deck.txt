@@ -1,0 +1,210 @@
+PAPUFY — PITCH DECK (texto)
+================================
+Marketplace de serviços locais
+Tagline: Sua grana extra, rápida.
+
+
+--------------------------------
+1. CAPA
+--------------------------------
+
+Papufy conecta quem precisa de um serviço a quem sabe fazer — com pagamento
+seguro no app.
+
+• Taxa: 7% só em pagamentos feitos pelo app
+• Dois lados: pedidos + profissionais
+• Pagamento: Pix + cartão (Asaas)
+
+
+--------------------------------
+2. PROBLEMA
+--------------------------------
+
+Serviços locais ainda rodam no improviso.
+
+Quem precisa de pintor, mecânico ou diarista depende de indicação, grupo de
+WhatsApp e pagamento na confiança. Quem presta serviço perde tempo caçando
+cliente e corre risco de calote.
+
+• Demanda dispersa — pedidos em redes sociais, sem padrão nem histórico
+• Oferta invisível — profissionais bons só no boca a boca do bairro
+• Dinheiro inseguro — acordo verbal, Pix direto, disputa sem mediação
+
+
+--------------------------------
+3. SOLUÇÃO
+--------------------------------
+
+Marketplace local com confiança e cash-out.
+
+O pedido encontra o profissional certo, o chat fecha o acordo e o pagamento
+acontece no app — com liberação após confirmação das duas partes.
+
+CONTRATANTE (“Preciso de um serviço”)
+• Publica o pedido em minutos
+• Recebe propostas no chat
+• Paga com Pix ou cartão
+• Confirma a conclusão do serviço
+
+PROFISSIONAL (“Ofereço um serviço”)
+• Anuncia perfil e aptidões
+• Negocia por chat / proposta
+• Recebe 93% via split
+• Saca para o Pix quando liberado
+
+
+--------------------------------
+4. PRODUTO
+--------------------------------
+
+Do anúncio ao saque, no mesmo app.
+
+• Dois funis: Pedido (preciso) e Perfil profissional (ofereço)
+  Categorias: reformas, assistência, domésticos, aulas e mais
+• Chat + proposta: negociação em tempo real, imagens e valor
+• Pagamento & carteira: Asaas (Pix/cartão), split 93/7, dupla
+  confirmação e saque Pix controlado pela plataforma
+
+Anunciar é grátis. Monetização só na transação.
+Produto mobile-first (web app).
+
+
+--------------------------------
+5. COMO FUNCIONA
+--------------------------------
+
+1. Anúncio
+2. Match / chat
+3. Pagamento
+4. Serviço
+5. Confirmação (contratante + profissional)
+6. Saque
+
+Por que o gate importa:
+O valor só libera para saque depois que as duas partes confirmam.
+Menos calote, mais confiança para usar o app.
+
+Take rate:
+Papufy cobra 7% apenas em pagamentos feitos pelo app.
+
+
+--------------------------------
+6. MERCADO
+--------------------------------
+
+Autônomos movem a economia real da cidade.
+
+Pintores, mecânicos, eletricistas, diaristas: renda média de conta própria
+no Brasil cerca de R$ 2,7 mil/mês (~R$ 32 mil/ano) — IBGE.
+O volume está no bairro — ainda pouco digitalizado.
+
+• TAM — serviços locais e “bicos” no Brasil (dezenas de milhões de
+  trabalhadores por conta própria)
+• SAM — cidades médias com densidade alta; início em Campina Grande – PB
+• SOM — capturar o GMV que hoje fecha no WhatsApp, com pagamento e
+  reputação no Papufy
+
+
+--------------------------------
+7. MODELO DE NEGÓCIO
+--------------------------------
+
+Ganhamos quando o serviço acontece.
+
+Receita
+• 7% sobre pagamentos in-app
+• Profissional recebe 93% (split)
+• Anúncio e chat: grátis
+
+Unit economics (ilustrativo)
+• Job R$ 200 → Papufy R$ 14
+• Job R$ 500 → Papufy R$ 35
+• Escalável com densidade local
+
+Próximas alavancas: planos para profissionais, destaque de anúncios,
+B2B (condomínios / imobiliárias).
+
+
+--------------------------------
+8. TRAÇÃO
+--------------------------------
+
+Produto vivo, receita em escala.
+
+• R$ 4 milhões — faturamento anual (run-rate / ARR)
+• ~R$ 333 mil — média mensal
+• ~R$ 57 milhões — GMV implícito @ 7%
+
+Já construído
+• App web mobile-first (React)
+• Backend + chat em tempo real
+• Pagamentos Asaas (Pix/cartão, carteira, saque)
+• Dupla confirmação e disputa
+
+Foco operacional
+• Liquidez em Campina Grande e região
+• Aumentar % de jobs pagos no app
+• Onboarding de profissionais verificados
+
+
+--------------------------------
+9. POSICIONAMENTO / COMPETIÇÃO
+--------------------------------
+
+Não somos classificados. Somos transação.
+
+                    WhatsApp/indicação   Classificados      Papufy
+Match local         Sim, caótico         Sim                Sim, estruturado
+Chat                Sim                  Limitado           Nativo + proposta
+Pagamento no app    Não                  Raro               Pix + cartão
+Proteção/liberação  Não                  Não                Dupla confirmação
+Monetização         —                    Lead / anúncio     Take rate 7%
+
+
+--------------------------------
+10. GO-TO-MARKET
+--------------------------------
+
+Densidade primeiro. Escala depois.
+
+1. Supply — recrutar profissionais por categoria quente (reformas,
+   assistência, domésticos) com anúncio grátis e saque claro
+2. Demand — aquisição local: redes, parcerias de bairro,
+   SEO “serviço + cidade”, indicação
+3. Expand — replicar o playbook cidade a cidade no Nordeste e praças
+   com o mesmo perfil
+
+
+--------------------------------
+11. VISÃO E VALUATION
+--------------------------------
+
+Visão: a infraestrutura de trabalho local do Brasil.
+
+Toda cidade tem oferta e demanda de serviço. Quase nenhuma tem o trilho
+completo: descoberta, acordo, pagamento e reputação.
+
+Valuation ilustrativo (venda 100%)
+• Faixa: R$ 28 – 40 milhões
+• Base: ~R$ 4 mi de faturamento anual (ARR) e múltiplos de marketplace
+  early/growth no Brasil
+• Sujeito a due diligence
+
+
+--------------------------------
+12. CONTATO / FECHAMENTO
+--------------------------------
+
+Papufy — vamos tirar o serviço do improviso.
+
+Marketplace local · pagamento seguro · grana extra rápida.
+
+• Site: papufy.com
+• Take rate: 7%
+• Faturamento (ARR): R$ 4 mi
+
+
+================================
+Arquivo gerado junto ao deck visual:
+pitch-deck/index.html
+================================

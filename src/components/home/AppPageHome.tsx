@@ -11,6 +11,8 @@ import { getApiBase } from "../../lib/api";
 import { FeaturedProfessionalsScroll } from "./FeaturedProfessionalsScroll";
 import { HomeHeroCarousel } from "./HomeHeroCarousel";
 import { RecentJobsGrid } from "./RecentJobsGrid";
+import { AutoAnimateList } from "../motion/AutoAnimateList";
+import { MotionEnter } from "../motion/MotionPrimitives";
 
 const FEATURED_COUNT = 6;
 const PROFESSIONALS_COUNT = 8;
@@ -154,6 +156,7 @@ export function AppPageHome() {
         />
 
         {showMoreSection && (
+          <MotionEnter delay={80}>
           <FadeContent delay={120}>
           <section>
             <header className="mb-3">
@@ -191,7 +194,7 @@ export function AppPageHome() {
             )}
 
             {moreListings.length > 0 && (
-              <div className="grid grid-cols-2 gap-2">
+              <AutoAnimateList className="grid grid-cols-2 gap-2">
                 {moreListings.map((listing) => (
                   <ListingCardMobile
                     key={listing.id}
@@ -199,7 +202,7 @@ export function AppPageHome() {
                     compact
                   />
                 ))}
-              </div>
+              </AutoAnimateList>
             )}
 
             {hasMore && <div ref={sentinelRef} className="h-4" aria-hidden />}
@@ -215,6 +218,7 @@ export function AppPageHome() {
             )}
           </section>
           </FadeContent>
+          </MotionEnter>
         )}
       </div>
 

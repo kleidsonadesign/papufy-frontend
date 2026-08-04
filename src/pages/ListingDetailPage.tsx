@@ -7,6 +7,8 @@ import { ListingSellerCard } from "../components/ListingSellerCard";
 import { SafeText } from "../components/SafeText";
 import { MobileShell } from "../components/mobile/MobileShell";
 import { StatusBadge } from "../components/StatusBadge";
+import { AnimatedLordIcon, useLordPlay } from "../components/icons/AnimatedLordIcon";
+import { MotionPressButton } from "../components/motion/MotionPrimitives";
 import { BRAZIL_STATES } from "../constants/categories";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
@@ -45,6 +47,7 @@ export function ListingDetailPage() {
   const [editUf, setEditUf] = useState("PB");
   const [editTelefone, setEditTelefone] = useState("");
   const [editSemQualificacao, setEditSemQualificacao] = useState(false);
+  const { playToken: chatPlay, trigger: triggerChat } = useLordPlay();
 
   const loadListing = async (listingId: string) => {
     const { listing: data } = await api.listings.getById(listingId);
@@ -144,6 +147,7 @@ export function ListingDetailPage() {
 
   const handleContact = async () => {
     if (!listing) return;
+    triggerChat();
 
     if (!isAuthenticated) {
       navigate("/entrar", {
@@ -431,16 +435,19 @@ export function ListingDetailPage() {
               </p>
 
               {!isOwner && (
-                <Button
-                  type="button"
-                  variant="papufy"
-                  size="cta"
+                <MotionPressButton
                   onClick={() => void handleContact()}
                   disabled={contactLoading || listing.status !== "OPEN"}
-                  className="mt-4 w-full rounded-xl"
+                  className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-sky-500 px-4 font-bold text-white disabled:opacity-60"
                 >
+                  <AnimatedLordIcon
+                    name="chat"
+                    size={26}
+                    playToken={chatPlay}
+                    loop={contactLoading}
+                  />
                   {contactLoading ? "Abrindo chat..." : ctaLabel}
-                </Button>
+                </MotionPressButton>
               )}
 
               {isOwner && !editing && (
@@ -515,16 +522,19 @@ export function ListingDetailPage() {
 
       {!isOwner && (
         <div className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom,0px))] left-0 right-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 backdrop-blur-md lg:hidden">
-          <Button
-            type="button"
-            variant="papufy"
-            size="cta"
+          <MotionPressButton
             onClick={() => void handleContact()}
             disabled={contactLoading || listing.status !== "OPEN"}
-            className="w-full rounded-2xl"
+            className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-sky-500 px-4 font-bold text-white disabled:opacity-60"
           >
+            <AnimatedLordIcon
+              name="chat"
+              size={26}
+              playToken={chatPlay}
+              loop={contactLoading}
+            />
             {contactLoading ? "Abrindo chat..." : ctaLabel}
-          </Button>
+          </MotionPressButton>
         </div>
       )}
     </MobileShell>

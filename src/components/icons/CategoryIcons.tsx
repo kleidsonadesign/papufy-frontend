@@ -23,6 +23,7 @@ import {
 
 export type CategoryIconKey =
   | "grid"
+  | "todos"
   | "clipboard"
   | "user"
   | "headset"
@@ -49,6 +50,7 @@ export type CategoryIconKey =
 
 const CATEGORY_ICON_MAP: Record<CategoryIconKey, LucideIcon> = {
   grid: LayoutGrid,
+  todos: LayoutGrid,
   sparkles: LayoutGrid,
   clipboard: ClipboardList,
   user: UserRound,
