@@ -1,6 +1,6 @@
 /**
  * Banners do carrossel hero.
- * PC: 1576×300 | Mobile: 800×376 (arquivos `*-mobile`).
+ * PC: 1576×300 | Mobile: 807×376 (arquivos `*-mobile`).
  */
 export type HeroSlideAction =
   | { type: "filter"; category: string }
@@ -13,7 +13,7 @@ export interface HeroSlide {
   id: string;
   /** Desktop 1576×300 */
   src: string;
-  /** Mobile 800×376 */
+  /** Mobile ~807×376 */
   srcMobile: string;
   alt: string;
   action?: HeroSlideAction;
@@ -21,7 +21,7 @@ export interface HeroSlide {
 
 export const HERO_BANNER_WIDTH = 1576;
 export const HERO_BANNER_HEIGHT = 300;
-export const HERO_BANNER_MOBILE_WIDTH = 800;
+export const HERO_BANNER_MOBILE_WIDTH = 807;
 export const HERO_BANNER_MOBILE_HEIGHT = 376;
 
 export const HERO_SLIDES: HeroSlide[] = [

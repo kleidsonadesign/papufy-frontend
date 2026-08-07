@@ -47,26 +47,33 @@ function HeroBannerImage({
   slide: HeroSlide;
   priority?: boolean;
 }) {
+  const common = {
+    alt: slide.alt,
+    loading: (priority ? "eager" : "lazy") as "eager" | "lazy",
+    fetchPriority: (priority ? "high" : "auto") as "high" | "auto",
+    decoding: "async" as const,
+    draggable: false,
+  };
+
   return (
-    <picture className="block h-full w-full">
-      <source
-        media="(min-width: 640px)"
-        srcSet={slide.src}
-        width={HERO_BANNER_WIDTH}
-        height={HERO_BANNER_HEIGHT}
-      />
+    <>
+      {/* Mobile: proporção nativa, sem object-fit/esticar */}
       <img
+        {...common}
         src={slide.srcMobile}
-        alt={slide.alt}
         width={HERO_BANNER_MOBILE_WIDTH}
         height={HERO_BANNER_MOBILE_HEIGHT}
-        className="h-full w-full object-contain object-center"
-        loading={priority ? "eager" : "lazy"}
-        fetchPriority={priority ? "high" : "auto"}
-        decoding="async"
-        draggable={false}
+        className="block h-auto w-full sm:hidden"
       />
-    </picture>
+      {/* Desktop: proporção nativa 1576×300 */}
+      <img
+        {...common}
+        src={slide.src}
+        width={HERO_BANNER_WIDTH}
+        height={HERO_BANNER_HEIGHT}
+        className="hidden h-auto w-full sm:block"
+      />
+    </>
   );
 }
 
@@ -107,7 +114,7 @@ function HeroSlidePanel({
   onAction: (action: HeroSlideAction) => void;
 }) {
   const frame = (
-    <div className="relative w-full overflow-hidden bg-transparent aspect-[800/376] sm:aspect-[1576/300]">
+    <div className="relative w-full overflow-hidden">
       <HeroBannerImage slide={slide} priority={priority} />
     </div>
   );
