@@ -1,7 +1,6 @@
 /**
- * Banners do carrossel hero (PNG/JPEG/WebP/SVG em /public).
- * Tamanho recomendado: 1576×300 px — bordas podem ser cortadas em telas estreitas;
- * mantenha texto e CTA na faixa central (~60% da largura).
+ * Banners do carrossel hero.
+ * PC: 1576×300 | Mobile: 800×376 (arquivos `*-mobile`).
  */
 export type HeroSlideAction =
   | { type: "filter"; category: string }
@@ -12,31 +11,38 @@ export type HeroSlideAction =
 
 export interface HeroSlide {
   id: string;
-  /** Caminho em /public (ex.: /slide1.png) */
+  /** Desktop 1576×300 */
   src: string;
+  /** Mobile 800×376 */
+  srcMobile: string;
   alt: string;
   action?: HeroSlideAction;
 }
 
 export const HERO_BANNER_WIDTH = 1576;
 export const HERO_BANNER_HEIGHT = 300;
+export const HERO_BANNER_MOBILE_WIDTH = 800;
+export const HERO_BANNER_MOBILE_HEIGHT = 376;
 
 export const HERO_SLIDES: HeroSlide[] = [
   {
-    id: "slide-1",
-    src: "/slide1.png",
-    alt: "Papufy — destaque 1",
+    id: "local",
+    src: "/banners/local.png",
+    srcMobile: "/banners/local-mobile.png",
+    alt: "Serviço local, sem enrolação — quem precisa e quem faz, na sua cidade",
+  },
+  {
+    id: "reformas",
+    src: "/banners/reformas.png",
+    srcMobile: "/banners/reformas-mobile.png",
+    alt: "Problema resolvido, perto de você — reformas, limpeza e assistência na sua região",
     action: { type: "filter", category: "Reformas e Reparos" },
   },
   {
-    id: "slide-3",
-    src: "/slide3.png",
-    alt: "Papufy — destaque 3",
+    id: "trabalhou-pagou",
+    src: "/banners/trabalhou-pagou.png",
+    srcMobile: "/banners/trabalhou-pagou-mobile.png",
+    alt: "Seu trabalho na hora certa — trabalhou, pagou",
     action: { type: "anunciar", listingType: "PROFESSIONAL_PROFILE" },
-  },
-  {
-    id: "slide-4",
-    src: "/slide4.png",
-    alt: "Papufy — destaque 4",
   },
 ];

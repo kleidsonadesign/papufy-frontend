@@ -10,6 +10,8 @@ import { useAuth } from "../../context/AuthContext";
 import { useFilters } from "../../context/FilterContext";
 import {
   HERO_BANNER_HEIGHT,
+  HERO_BANNER_MOBILE_HEIGHT,
+  HERO_BANNER_MOBILE_WIDTH,
   HERO_BANNER_WIDTH,
   HERO_SLIDES,
   type HeroSlide,
@@ -46,17 +48,25 @@ function HeroBannerImage({
   priority?: boolean;
 }) {
   return (
-    <img
-      src={slide.src}
-      alt={slide.alt}
-      width={HERO_BANNER_WIDTH}
-      height={HERO_BANNER_HEIGHT}
-      className="h-full w-full origin-center object-contain object-center max-sm:scale-[2] sm:scale-100"
-      loading={priority ? "eager" : "lazy"}
-      fetchPriority={priority ? "high" : "auto"}
-      decoding="async"
-      draggable={false}
-    />
+    <picture className="block h-full w-full">
+      <source
+        media="(min-width: 640px)"
+        srcSet={slide.src}
+        width={HERO_BANNER_WIDTH}
+        height={HERO_BANNER_HEIGHT}
+      />
+      <img
+        src={slide.srcMobile}
+        alt={slide.alt}
+        width={HERO_BANNER_MOBILE_WIDTH}
+        height={HERO_BANNER_MOBILE_HEIGHT}
+        className="h-full w-full object-contain object-center"
+        loading={priority ? "eager" : "lazy"}
+        fetchPriority={priority ? "high" : "auto"}
+        decoding="async"
+        draggable={false}
+      />
+    </picture>
   );
 }
 
@@ -97,7 +107,7 @@ function HeroSlidePanel({
   onAction: (action: HeroSlideAction) => void;
 }) {
   const frame = (
-    <div className="relative aspect-video w-full overflow-hidden bg-slate-100 sm:aspect-[1576/300]">
+    <div className="relative w-full overflow-hidden bg-transparent aspect-[800/376] sm:aspect-[1576/300]">
       <HeroBannerImage slide={slide} priority={priority} />
     </div>
   );
