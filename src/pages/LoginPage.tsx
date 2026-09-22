@@ -302,6 +302,17 @@ export function LoginPage() {
               />
             </AuthField>
 
+            {mode === "login" && (
+              <div className="-mt-1 text-right">
+                <Link
+                  to="/esqueci-senha"
+                  className="text-sm font-semibold text-sky-600 hover:text-sky-700"
+                >
+                  Esqueci a senha
+                </Link>
+              </div>
+            )}
+
             {mode === "register" && (
               <p className="text-xs leading-relaxed text-slate-500">
                 Use letras e números na senha. CPF/CNPJ e data de nascimento (CPF)

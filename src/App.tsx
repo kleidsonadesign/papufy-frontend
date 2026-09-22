@@ -23,6 +23,16 @@ const ListingDetailPage = lazy(() =>
 const LoginPage = lazy(() =>
   import("./pages/LoginPage").then((m) => ({ default: m.LoginPage }))
 );
+const ForgotPasswordPage = lazy(() =>
+  import("./pages/ForgotPasswordPage").then((m) => ({
+    default: m.ForgotPasswordPage,
+  }))
+);
+const ResetPasswordPage = lazy(() =>
+  import("./pages/ResetPasswordPage").then((m) => ({
+    default: m.ResetPasswordPage,
+  }))
+);
 const AnunciarTipoPage = lazy(() =>
   import("./pages/AnunciarTipoPage").then((m) => ({ default: m.AnunciarTipoPage }))
 );
@@ -78,6 +88,8 @@ export default function App() {
                     <Route path="/anuncio/:id" element={<ListingDetailPage />} />
                     <Route path="/usuario/:id" element={<UserPublicProfilePage />} />
                     <Route path="/entrar" element={<LoginPage />} />
+                    <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
+                    <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
                     <Route path="/anunciar/tipo" element={<AnunciarTipoPage />} />
                     <Route
                       path="/anunciar"
